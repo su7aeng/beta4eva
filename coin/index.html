@@ -1,10 +1,1224 @@
-<!DOCTYPE html>
+<!doctype html>
+<html lang="ko">
+<head>
 <meta charset="utf-8">
-<title>upbit — beta4eva</title>
-<body style="background:#0b0d10;color:#8b93a1;font-family:ui-monospace,monospace;display:grid;place-items:center;height:100vh;margin:0">
-<div style="text-align:center">
-<p style="color:#e6e9ef;font-size:20px;margin:0 0 8px">upbit</p>
-<p style="margin:0 0 20px">아직 안 올림. 여기에 아티팩트 HTML을 index.html로 덮어쓰면 됨.</p>
-<a href="/" style="color:#7cf2b0">← beta4eva</a>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코인 시장 읽기 연습</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#F2F4F2; --card:#FFFFFF; --card-2:#FAFBFA;
+    --line:#DFE4E0; --line-2:#EDF0EE;
+    --ink:#141C18; --dim:#5B6862; --faint:#8B978F;
+    --up:#D33A34;      /* 한국식: 오르면 빨강 */
+    --down:#2A6BC7;    /* 한국식: 내리면 파랑 */
+    --up-bg:#FBEAE9; --down-bg:#E8F0FB;
+    --accent:#14544A; --accent-soft:#E4EDEA;
+    --shadow:0 1px 2px rgba(20,28,24,.05), 0 8px 24px -16px rgba(20,28,24,.18);
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#101512; --card:#171E1A; --card-2:#141A17;
+      --line:#26302B; --line-2:#1E2622;
+      --ink:#E6EBE7; --dim:#9BA8A1; --faint:#6E7B74;
+      --up:#F2726B; --down:#7BA9E8;
+      --up-bg:#2A1917; --down-bg:#141F2C;
+      --accent:#8FC9B8; --accent-soft:#1B2723;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#101512; --card:#171E1A; --card-2:#141A17;
+    --line:#26302B; --line-2:#1E2622;
+    --ink:#E6EBE7; --dim:#9BA8A1; --faint:#6E7B74;
+    --up:#F2726B; --down:#7BA9E8;
+    --up-bg:#2A1917; --down-bg:#141F2C;
+    --accent:#8FC9B8; --accent-soft:#1B2723;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -18px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:"IBM Plex Sans KR", system-ui, sans-serif;
+    font-size:15.5px; line-height:1.7; -webkit-font-smoothing:antialiased;
+    word-break:keep-all;              /* 한글을 글자 단위로 쪼개지 않음 */
+    overflow-wrap:break-word;         /* 한 단어가 칸보다 길 때만 예외 */
+  }
+  p,li,dd,dt,td,th,h1,h2,h3,.mc-read,.co-reads span,.lede{text-wrap:pretty}
+  .wrap{max-width:1000px;margin:0 auto;padding-inline:20px;padding-block:40px 80px;display:flex;flex-direction:column;gap:52px}
+  .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .up{color:var(--up)} .down{color:var(--down)} .flat{color:var(--dim)}
+
+  /* 머리말 */
+  header.top{display:flex;flex-direction:column;gap:14px}
+  .eyebrow{font-size:12.5px;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;font-weight:600;margin:0}
+  h1{font-family:"Gowun Batang",serif;font-weight:700;font-size:clamp(30px,5.6vw,44px);line-height:1.22;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .lede{margin:0;font-size:16.5px;color:var(--dim);max-width:60ch}
+  .status{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--faint);font-family:"IBM Plex Mono",monospace}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--faint);flex:none}
+  .dot.on{background:#2F9E6E;box-shadow:0 0 0 4px rgba(47,158,110,.16)}
+  .dot.warn{background:#D9A21B;box-shadow:0 0 0 4px rgba(217,162,27,.16)}
+  .dot.off{background:var(--up);box-shadow:0 0 0 4px rgba(211,58,52,.14)}
+
+  /* 섹션 */
+  section{display:flex;flex-direction:column;gap:18px}
+  .s-head{display:flex;flex-direction:column;gap:5px}
+  .s-num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.1em}
+  h2{font-family:"Gowun Batang",serif;font-weight:700;font-size:25px;line-height:1.3;margin:0;letter-spacing:-.01em}
+  .s-head p{margin:0;font-size:14.5px;color:var(--dim);max-width:62ch}
+
+  /* 오늘 분위기 */
+  .mood{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .mood-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+  .mc-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .mc-where{font-weight:600;font-size:15px}
+  .mc-where small{display:block;font-weight:400;font-size:12px;color:var(--faint);letter-spacing:.02em}
+  .mc-verdict{font-family:"Gowun Batang",serif;font-weight:700;font-size:21px;white-space:nowrap}
+  .split{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--line-2)}
+  .split i{display:block;transition:width .6s cubic-bezier(.2,.7,.2,1)}
+  .split .u{background:var(--up)} .split .d{background:var(--down)}
+  .mc-read{font-size:14px;color:var(--dim);margin:0}
+  .mc-read b{color:var(--ink);font-weight:600}
+  .mc-nums{display:flex;gap:18px;font-size:13px;color:var(--faint);font-family:"IBM Plex Mono",monospace}
+
+  /* 설명 상자 */
+  .note{background:var(--accent-soft);border-radius:12px;padding:16px 18px;font-size:14px;color:var(--ink);display:flex;gap:12px;align-items:flex-start}
+  .note .k{font-family:"Gowun Batang",serif;font-weight:700;color:var(--accent);white-space:nowrap;flex:none}
+  .note p{margin:0;color:var(--dim)}
+  .note p b{color:var(--ink);font-weight:600}
+
+  /* 표 */
+  .tbl-box{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+  table{border-collapse:collapse;width:100%;min-width:620px}
+  th,td{padding:12px 16px;text-align:right;border-bottom:1px solid var(--line-2);white-space:nowrap}
+  th{font-size:12px;color:var(--faint);font-weight:500;letter-spacing:.04em;background:var(--card-2);position:sticky;top:0}
+  th:first-child,td:first-child{text-align:left}
+  tbody tr:last-child td{border-bottom:none}
+  .cname{font-weight:600}
+  .cname small{display:block;font-weight:400;font-size:11.5px;color:var(--faint);font-family:"IBM Plex Mono",monospace;letter-spacing:.03em}
+  td.big{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:14.5px}
+  .chg{font-family:"IBM Plex Mono",monospace;font-weight:600;font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:99px;font-family:"IBM Plex Sans KR",sans-serif}
+  .tag.u{background:var(--up-bg);color:var(--up)} .tag.d{background:var(--down-bg);color:var(--down)}
+  .tag.n{background:var(--line-2);color:var(--dim)}
+
+  /* 코인 카드 */
+  .coins{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .coin{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
+  .co-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .co-id{display:flex;flex-direction:column}
+  .co-kr{font-family:"Gowun Batang",serif;font-weight:700;font-size:19px;line-height:1.25}
+  .co-en{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);letter-spacing:.06em}
+  .co-price{text-align:right}
+  .co-now{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:19px;font-weight:500;transition:color .6s}
+  .co-now span{font-size:12px;color:var(--faint);font-weight:400}
+  .co-chg{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600}
+  .spark{width:100%;height:52px;display:block}
+  .rowline{display:flex;flex-direction:column;gap:7px}
+  .rl-head{display:flex;justify-content:space-between;font-size:12.5px;color:var(--dim)}
+  .rl-head b{color:var(--ink);font-weight:600;font-family:"IBM Plex Mono",monospace}
+  .rl-track{height:8px;background:var(--line-2);border-radius:99px;position:relative}
+  .rl-mark{position:absolute;top:-3px;width:3px;height:14px;border-radius:2px;background:var(--ink);transition:left .6s cubic-bezier(.2,.7,.2,1)}
+  .rl-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--faint);font-family:"IBM Plex Mono",monospace}
+  .co-reads{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line-2);padding-top:14px;font-size:13.5px;color:var(--dim)}
+  .co-reads div{display:flex;gap:8px}
+  .co-reads .b{color:var(--accent);flex:none;font-weight:600}
+
+  /* 자금 흐름 */
+  .flow{display:flex;flex-direction:column;gap:2px}
+  .fl-row{display:grid;grid-template-columns:112px 1fr 108px;align-items:center;gap:12px;padding:7px 0}
+  .fl-name{font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fl-bar{height:20px;background:var(--line-2);border-radius:4px;overflow:hidden}
+  .fl-bar i{display:block;height:100%;background:var(--accent);opacity:.75;transition:width .6s}
+  .fl-val{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums}
+
+  /* 학습 노트 */
+  .lessons{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .lesson{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .lesson h3{font-family:"Gowun Batang",serif;font-weight:700;font-size:17px;margin:0 0 8px}
+  .lesson p{margin:0 0 9px;font-size:14px;color:var(--dim)}
+  .lesson p:last-child{margin-bottom:0}
+  .lesson b{color:var(--ink);font-weight:600}
+  .lesson .ex{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--card-2);border:1px solid var(--line-2);border-radius:8px;padding:9px 12px;color:var(--dim);margin-top:10px}
+
+
+  /* 실시간 차트 */
+  .chart-box{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+  .cb-bar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line-2)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-family:"IBM Plex Sans KR",sans-serif;font-size:13px;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card-2);color:var(--dim);cursor:pointer;transition:.15s}
+  .chip:hover{border-color:var(--accent);color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card);font-weight:600}
+  :root[data-theme="dark"] .chip[aria-pressed="true"],
+  :root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#101512}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .cb-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;padding:18px 20px 4px}
+  .cb-id .co-kr{font-size:22px}
+  .cb-live{display:flex;align-items:baseline;gap:10px}
+  .cb-price{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:26px;font-weight:500;transition:color .5s}
+  .cb-price small{font-size:13px;color:var(--faint);font-weight:400}
+  .cb-delta{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600}
+  .ohlc{display:flex;flex-wrap:wrap;gap:4px 18px;padding:4px 20px 10px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dim);min-height:30px}
+  .ohlc span b{color:var(--ink);font-weight:600;margin-left:5px}
+  .ohlc .lbl{color:var(--faint)}
+  .cv-wrap{position:relative;padding:0 8px}
+  .cv-wrap canvas{width:100%;height:360px;display:block;cursor:crosshair;touch-action:pan-y}
+  .cv-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;font-size:13.5px;color:var(--faint);background:var(--card)}
+  .cv-msg[hidden]{display:none}
+  .cv-hint{margin:0;padding:2px 20px 14px;font-size:12px;color:var(--faint)}
+
+  .ticks-panel{border-top:1px solid var(--line-2);background:var(--card-2)}
+  .tp-head{display:flex;justify-content:space-between;align-items:baseline;padding:11px 20px 7px;font-size:13px;font-weight:600}
+  .tp-head span:last-child{font-weight:400;font-size:12px;color:var(--faint)}
+  .tp-rows{max-height:172px;overflow-y:auto;padding:0 20px 12px}
+  .tp-rows p.tp-empty{margin:0;padding:14px 0;font-size:13px;color:var(--faint);text-align:center}
+  .tk{display:grid;grid-template-columns:64px 1fr 96px 56px;gap:10px;align-items:baseline;font-family:"IBM Plex Mono",monospace;font-size:12.5px;padding:3.5px 0;border-bottom:1px solid var(--line-2)}
+  .tk:last-child{border-bottom:none}
+  .tk .tt{color:var(--faint);font-size:11.5px}
+  .tk .tp{font-weight:600;font-variant-numeric:tabular-nums}
+  .tk .tq{text-align:right;color:var(--dim);font-variant-numeric:tabular-nums}
+  .tk .ts{text-align:right;font-size:11.5px}
+  .tk.buy .tp,.tk.buy .ts{color:var(--up)}
+  .tk.sell .tp,.tk.sell .ts{color:var(--down)}
+  .tk.fresh{animation:tkin .5s ease-out}
+  @keyframes tkin{from{background:var(--accent-soft)}to{background:transparent}}
+
+  .candle-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .cl-item{display:flex;gap:10px;align-items:center}
+  .cl-item div{display:flex;flex-direction:column}
+  .cl-item b{font-size:13px;color:var(--ink)}
+  .cl-item span{font-size:12.5px;color:var(--dim);line-height:1.5}
+  .note>div{min-width:0}
+  .cb-say{padding:14px 20px;background:var(--card-2);border-top:1px solid var(--line-2);font-size:14px;color:var(--dim);margin:0}
+  .cb-say b{color:var(--ink);font-weight:600}
+
+  /* 방금 움직인 */
+  .movers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .mv{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:3px}
+  .mv .n{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mv .v{font-family:"IBM Plex Mono",monospace;font-size:17px;font-weight:600}
+  .mv .w{font-size:12px;color:var(--faint)}
+  .mv{cursor:pointer;transition:border-color .15s, transform .15s}
+  .mv:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .mv:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .mv .mspark{width:100%;height:44px;display:block;margin-top:2px}
+  .mv .go{font-size:11.5px;color:var(--accent);font-weight:600}
+  .coin-sel{font-family:"IBM Plex Sans KR",sans-serif;font-size:13px;padding:5px 10px;border-radius:99px;
+    border:1px solid var(--line);background:var(--card-2);color:var(--dim);max-width:170px}
+  .coin-sel:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .mv.quiet{grid-column:1/-1;align-items:center;color:var(--faint);font-size:13.5px;padding:18px}
+
+  /* 진단 */
+  .diag{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:18px 20px;font-size:13.5px}
+  .diag h3{font-family:"Gowun Batang",serif;font-weight:700;font-size:16px;margin:0 0 10px}
+  .diag table{min-width:0;width:100%}
+  .diag td{border:none;padding:3px 0;font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-align:left;white-space:normal}
+  .diag td:first-child{color:var(--faint);width:150px;padding-right:12px}
+  .diag .ok{color:#2F9E6E} .diag .bad{color:var(--up)} .diag .wait{color:#B98A12}
+  .diag .fix{margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line-2);font-family:"IBM Plex Sans KR",sans-serif;font-size:13.5px;color:var(--dim)}
+  .diag .fix b{color:var(--ink)}
+
+  footer{font-size:12.5px;color:var(--faint);border-top:1px solid var(--line);padding-top:20px;display:flex;flex-direction:column;gap:6px}
+  footer p{margin:0;max-width:70ch}
+
+  @media (max-width:760px){
+    .mood,.coins,.lessons,.candle-legend{grid-template-columns:1fr}
+    .cv-wrap canvas{height:280px}
+    .tk{grid-template-columns:56px 1fr 72px 44px;gap:6px;font-size:11.5px}
+    .fl-row{grid-template-columns:88px 1fr 92px;gap:8px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">업비트 · 바이낸스 실시간</p>
+    <h1>코인 시장 읽기 연습</h1>
+    <p class="lede">숫자를 외우는 페이지가 아니라, <b>지금 무슨 일이 벌어지는지 읽는 법</b>을 익히는 페이지예요.
+      한국 거래소(업비트)와 세계에서 가장 큰 거래소(바이낸스)를 나란히 놓고 봅니다. 어려운 용어는 나올 때마다 그 자리에서 풀어 씁니다.</p>
+    <p class="status"><span class="dot" id="dot"></span><span id="conn">연결하는 중…</span></p>
+  </header>
+
+  <section class="diag" id="diag" hidden>
+    <h3>연결 상태 점검</h3>
+    <table>
+      <tr><td>이 파일을 연 방식</td><td id="d-loc">—</td></tr>
+      <tr><td>업비트</td><td id="d-upbit" class="wait">확인 중…</td></tr>
+      <tr><td>바이낸스</td><td id="d-bin" class="wait">확인 중…</td></tr>
+    </table>
+    <p class="fix" id="d-fix">확인 중이에요. 몇 초만 기다려 주세요.</p>
+  </section>
+
+  <!-- 1. 오늘 분위기 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">01</span>
+      <h2>오늘 시장 분위기</h2>
+      <p>개별 코인 하나를 보기 전에, 시장 전체가 오르는 쪽인지 내리는 쪽인지부터 봅니다. 오른 코인이 몇 개, 내린 코인이 몇 개인지 세는 것만으로도 분위기가 보여요.</p>
+    </div>
+    <div class="mood" id="mood">
+      <div class="mood-card"><div class="mc-top"><div class="mc-where">업비트 <small>한국 · 원화</small></div><div class="mc-verdict flat">—</div></div><div class="split"><i class="u" style="width:0"></i><i class="d" style="width:0"></i></div><p class="mc-read">아직 자료를 받는 중이에요.</p></div>
+      <div class="mood-card"><div class="mc-top"><div class="mc-where">바이낸스 <small>세계 1위 · 달러</small></div><div class="mc-verdict flat">—</div></div><div class="split"><i class="u" style="width:0"></i><i class="d" style="width:0"></i></div><p class="mc-read">아직 자료를 받는 중이에요.</p></div>
+    </div>
+    <div class="note">
+      <span class="k">읽는 법</span>
+      <p>빨간 칸이 <b>오른 코인</b>, 파란 칸이 <b>내린 코인</b>이에요. 한국 거래소는 오르면 빨강, 내리면 파랑으로 표시하는 게 관행이라 이 페이지도 그대로 따랐습니다.
+        두 거래소의 빨강·파랑 비율이 비슷하면 <b>전 세계가 같은 방향</b>으로 움직이는 것이고, 한쪽만 다르면 그 나라 사정(환율, 국내 뉴스)이 끼어든 신호일 수 있어요.</p>
+    </div>
+  </section>
+
+  <!-- 2. 같은 코인, 두 시장 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">02</span>
+      <h2>같은 코인인데 값이 다르다</h2>
+      <p>비트코인은 세계 어디서든 같은 비트코인인데, 한국 가격과 세계 가격이 딱 맞지 않습니다. 얼마나 차이 나는지, 그게 무슨 뜻인지 봅니다.</p>
+    </div>
+    <div class="tbl-box">
+      <table>
+        <thead><tr>
+          <th>코인</th><th>업비트 (원)</th><th>바이낸스 (원으로 환산)</th><th>차이</th><th>한국이 24시간 동안</th><th>세계가 24시간 동안</th>
+        </tr></thead>
+        <tbody id="cmp"><tr><td colspan="6" style="text-align:center;color:var(--faint)">자료를 받는 중…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="note">
+      <span class="k">읽는 법</span>
+      <p><b>차이</b>가 +2%라면, 같은 코인을 한국에서 2% 더 비싸게 사고 있다는 뜻이에요. 한국에서 사려는 사람이 많으면 이 값이 올라가고, 팔려는 사람이 많으면 내려가거나 마이너스가 됩니다.
+        국경을 넘겨 옮기는 게 번거롭기 때문에 차이가 바로 사라지지 않아요. 이 값이 <b>평소보다 크게 벌어졌다면 한국만 과열된 상태</b>일 수 있다는 신호로 씁니다.
+        달러 가격을 원으로 바꿀 때는 업비트에서 거래되는 달러코인(테더) 시세를 환율 대신 썼습니다 — <span id="usdrate" class="mono">—</span></p>
+    </div>
+  </section>
+
+
+  <!-- 3. 차트창 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">03</span>
+      <h2>차트창 보기</h2>
+      <p>증권사 차트와 같은 방식이에요. 막대(봉) 하나가 정해진 시간 동안의 가격을 요약하고, 오른쪽 끝 막대는 <b>지금 만들어지고 있는 중</b>이라 계속 모양이 바뀝니다. 아래에는 실제로 방금 사고팔린 기록이 한 줄씩 올라옵니다.</p>
+    </div>
+
+    <div class="chart-box">
+      <div class="cb-bar">
+        <div class="chips" id="pick-coin" role="group" aria-label="코인 선택"></div>
+        <div class="chips" id="pick-span" role="group" aria-label="막대 단위 선택"></div>
+      </div>
+
+      <div class="cb-head">
+        <div class="cb-id"><div class="co-kr" id="cb-name">—</div><div class="co-en" id="cb-sym">불러오는 중</div></div>
+        <div class="cb-live">
+          <span class="cb-price" id="cb-price">—</span>
+          <span class="cb-delta" id="cb-delta"></span>
+        </div>
+      </div>
+
+      <div class="ohlc" id="ohlc"></div>
+
+      <div class="cv-wrap" id="cv-wrap">
+        <canvas id="cv"></canvas>
+        <p class="cv-msg" id="cv-msg">차트를 불러오는 중…</p>
+      </div>
+      <p class="cv-hint">막대에 마우스를 올리면 그 시간의 값이 위에 표시됩니다. 휠을 굴리면 확대·축소, 좌우로 끌면 과거를 볼 수 있어요.</p>
+
+      <div class="ticks-panel">
+        <div class="tp-head"><span>실시간 체결</span><span id="tp-sub">방금 사고팔린 기록</span></div>
+        <div class="tp-rows" id="tp-rows"><p class="tp-empty">기다리는 중…</p></div>
+      </div>
+
+      <p class="cb-say" id="cb-say">자료를 받는 중이에요.</p>
+    </div>
+
+    <div class="note">
+      <span class="k">봉 읽는 법</span>
+      <div>
+        <p style="margin:0 0 10px">막대 하나는 <b>그 시간 동안의 가격 네 개</b>를 한 번에 보여줍니다. 시작값(시가), 끝값(종가), 그 사이 최고값(고가)과 최저값(저가)이에요.
+          몸통은 시작값과 끝값 사이, 위아래로 뻗은 얇은 선은 그 시간 안에서 잠깐 갔다 온 최고·최저입니다.</p>
+        <div class="candle-legend">
+          <div class="cl-item">
+            <svg viewBox="0 0 40 90" width="30" height="68" aria-hidden="true">
+              <line x1="20" y1="6" x2="20" y2="80" stroke="var(--up)" stroke-width="2"></line>
+              <rect x="9" y="26" width="22" height="38" fill="var(--up)"></rect>
+            </svg>
+            <div><b>오른 막대 (빨강)</b><span>끝값이 시작값보다 높음. 그 시간 동안 값이 올랐어요.</span></div>
+          </div>
+          <div class="cl-item">
+            <svg viewBox="0 0 40 90" width="30" height="68" aria-hidden="true">
+              <line x1="20" y1="6" x2="20" y2="80" stroke="var(--down)" stroke-width="2"></line>
+              <rect x="9" y="26" width="22" height="38" fill="var(--down)"></rect>
+            </svg>
+            <div><b>내린 막대 (파랑)</b><span>끝값이 시작값보다 낮음. 그 시간 동안 값이 내렸어요.</span></div>
+          </div>
+          <div class="cl-item">
+            <svg viewBox="0 0 40 90" width="30" height="68" aria-hidden="true">
+              <line x1="20" y1="4" x2="20" y2="84" stroke="var(--faint)" stroke-width="2"></line>
+              <rect x="9" y="40" width="22" height="10" fill="var(--faint)"></rect>
+            </svg>
+            <div><b>꼬리가 긴 막대</b><span>많이 갔다가 되돌아온 시간. 사는 쪽과 파는 쪽이 세게 부딪혔다는 뜻이에요.</span></div>
+          </div>
+        </div>
+        <p style="margin:12px 0 0">아래쪽 회색 막대는 <b>그 시간에 거래된 양</b>이에요. 가격이 크게 움직였는데 이 막대가 짧으면 소수가 만든 움직임이라 되돌아가기 쉽고, 함께 길면 많은 사람이 참여한 움직임입니다.</p>
+      </div>
+    </div>
+
+    <div class="s-head" style="margin-top:8px">
+      <h2 style="font-size:19px">방금 움직인 코인</h2>
+      <p>최근 30초 사이에 값이 가장 많이 바뀐 코인이에요. 카드를 누르면 위 차트창에서 그 코인을 바로 볼 수 있습니다. 시장이 조용하면 비어 있는 게 정상이에요.</p>
+    </div>
+    <div class="movers" id="movers"><div class="mv quiet">지켜보는 중이에요…</div></div>
+  </section>
+
+  <!-- 4. 여러 코인 비교 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">04</span>
+      <h2>여러 코인 한눈에 비교</h2>
+      <p>같은 잣대로 여러 코인을 나란히 놓고 봅니다. 최근 30일 흐름, 오늘 하루 중 어디쯤, 1년 최고가에서 얼마나 내려왔는지 — 이 세 가지예요.</p>
+    </div>
+    <div class="coins" id="coins"></div>
+    <div class="note">
+      <span class="k">읽는 법</span>
+      <p><b>30일 흐름</b>이 우상향이면 오르는 추세, 우하향이면 내리는 추세예요. 하루 등락은 흐름 안의 잡음일 수 있으니 둘을 같이 봅니다.
+        <b>오늘 위치</b>가 오른쪽 끝에 붙어 있으면 오늘 가장 비싼 값 근처에서 거래되는 중이고, 왼쪽 끝이면 가장 싼 값 근처예요.
+        <b>1년 최고가 대비</b>가 -60%라면 작년 가장 비쌌던 때보다 60% 싸다는 뜻인데, 싸다고 곧 오른다는 뜻은 전혀 아닙니다.</p>
+    </div>
+  </section>
+
+  <!-- 4. 자금 흐름 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">05</span>
+      <h2>돈이 어디로 몰리나</h2>
+      <p>가격보다 정직한 신호가 <b>거래된 금액</b>이에요. 하루 동안 어느 코인에 돈이 가장 많이 오갔는지 보면, 사람들의 관심이 어디 있는지 알 수 있습니다.</p>
+    </div>
+    <div class="flow" id="flow"></div>
+    <div class="note">
+      <span class="k">읽는 법</span>
+      <p>비트코인·이더리움 같은 <b>큰 코인에 돈이 몰리면</b> 시장이 비교적 차분한 편이고, 이름을 처음 듣는 작은 코인들이 상위권을 차지하면 <b>단기 과열</b>인 경우가 많아요.
+        가격이 오르는데 거래 금액이 적으면 소수가 올린 것이라 되돌아가기 쉽고, 거래 금액이 함께 크면 더 많은 사람이 동의한 움직임입니다.</p>
+    </div>
+  </section>
+
+  <!-- 5. 학습 노트 -->
+  <section>
+    <div class="s-head">
+      <span class="s-num">06</span>
+      <h2>이것만 알면 절반은 읽는다</h2>
+      <p>위 화면을 보며 계속 쓰이는 개념 네 가지입니다.</p>
+    </div>
+    <div class="lessons">
+      <div class="lesson">
+        <h3>등락률의 기준은 '어제'다</h3>
+        <p>"+5%"는 <b>어제 이 시각(또는 어제 마감) 대비</b> 5% 올랐다는 뜻이에요. 기준이 어제라서, 어제가 유난히 낮았으면 오늘 +5%도 실제로는 여전히 낮은 값일 수 있습니다.</p>
+        <p>그래서 항상 <b>더 긴 기간</b>과 함께 봐야 해요.</p>
+        <div class="ex">어제 100원 → 오늘 105원 = +5%<br>한 달 전 200원이었다면, +5%여도 한 달 기준으론 반값</div>
+      </div>
+      <div class="lesson">
+        <h3>거래 금액과 거래량은 다르다</h3>
+        <p><b>거래량</b>은 몇 개가 오갔는지(개수), <b>거래 금액</b>은 얼마가 오갔는지(돈)예요. 개수는 코인마다 단가가 달라 비교가 안 되니, 이 페이지는 전부 <b>금액</b>으로 비교합니다.</p>
+        <div class="ex">1개 1억원 코인 10개 = 10억원<br>1개 1원 코인 1,000만개 = 1,000만원</div>
+      </div>
+      <div class="lesson">
+        <h3>싸 보이는 가격은 착시다</h3>
+        <p>한 개에 100원인 코인이 1억원인 비트코인보다 싸다는 건 <b>틀린 비교</b>예요. 발행 개수가 다르기 때문입니다. 개당 가격이 아니라 <b>전체 규모</b>로 비교해야 합니다.</p>
+        <p>"1,000원짜리니까 10,000원 가겠지"는 근거가 없는 생각이에요.</p>
+      </div>
+      <div class="lesson">
+        <h3>두 시장을 같이 보는 이유</h3>
+        <p>코인은 24시간 전 세계에서 거래돼요. 큰 흐름은 <b>세계 시장</b>이 만들고, 한국 시장은 여기에 국내 사정이 얹힙니다.</p>
+        <p>세계는 조용한데 한국만 튀면 국내 이슈, 둘이 같이 움직이면 세계적인 이슈 — 이렇게 원인을 좁혀 볼 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>업비트와 바이낸스가 공개한 시세를 브라우저가 직접 받아 그립니다. 새로고침 없이 계속 갱신되고, 창을 닫으면 멈춰요. 서버에 아무것도 저장하지 않습니다.</p>
+    <p>이 페이지는 시세를 읽는 연습용 자료이며, 특정 코인을 사거나 팔라는 권유나 투자 조언이 아닙니다. 코인은 원금을 전부 잃을 수 있는 자산입니다.</p>
+  </footer>
+
 </div>
+
+<script>
+"use strict";
+
+/* ═══ 설정 ═══════════════════════════════════ */
+const CARDS   = ["BTC","ETH","XRP","SOL","DOGE","ADA"];   // 추세 카드에 세울 코인
+const CMP     = ["BTC","ETH","XRP","SOL","DOGE","ADA","LINK","AVAX"]; // 두 시장 비교
+const FLOW_N  = 10;
+const PAINT_MS = 700;
+
+const KRW_FALLBACK = ["KRW-BTC","KRW-ETH","KRW-XRP","KRW-SOL","KRW-DOGE","KRW-ADA","KRW-USDT",
+  "KRW-LINK","KRW-AVAX","KRW-DOT","KRW-TRX","KRW-ETC","KRW-BCH","KRW-SUI","KRW-NEAR","KRW-XLM",
+  "KRW-HBAR","KRW-SHIB","KRW-APT","KRW-ARB","KRW-SEI","KRW-ENA","KRW-ONDO","KRW-WLD","KRW-PEPE"];
+const NAME_FALLBACK = {BTC:"비트코인",ETH:"이더리움",XRP:"엑스알피",SOL:"솔라나",DOGE:"도지코인",
+  ADA:"에이다",LINK:"체인링크",AVAX:"아발란체",DOT:"폴카닷",TRX:"트론",USDT:"테더",ETC:"이더리움클래식",
+  BCH:"비트코인캐시",SUI:"수이",NEAR:"니어프로토콜",XLM:"스텔라루멘",HBAR:"헤데라",SHIB:"시바이누",
+  APT:"앱토스",ARB:"아비트럼",SEI:"세이",ENA:"에테나",ONDO:"온도파이낸스",WLD:"월드코인",PEPE:"페페"};
+
+/* ═══ 도구 ═══════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const pctTxt  = x => (x>=0?"+":"") + (x*100).toFixed(2) + "%";
+const pctTxt1 = x => (x>=0?"+":"") + (x*100).toFixed(1) + "%";
+const cls     = x => x>0.00005 ? "up" : x<-0.00005 ? "down" : "flat";
+const won = p => p>=1000 ? Math.round(p).toLocaleString("ko-KR")
+                : p>=1 ? p.toFixed(2) : p.toPrecision(3);
+const money = v => {                       // 원 단위 금액을 조/억으로
+  const e = v/1e8;
+  return e>=10000 ? (e/10000).toFixed(2)+"조원" : e>=1 ? Math.round(e).toLocaleString("ko-KR")+"억원"
+       : Math.round(v/1e4).toLocaleString("ko-KR")+"만원";
+};
+
+/* ═══ 상태 ═══════════════════════════════════ */
+const kr  = new Map();   // 업비트: SYM -> {p,chg,vol,hi,lo,y52}
+const gl  = new Map();   // 바이낸스: SYM -> {p,chg,vol}
+const name = {...NAME_FALLBACK};
+const hist = new Map();  // SYM -> [30일 종가]
+let krMsgs = 0, glMsgs = 0;
+let dg = {loc:null, upbit:null, bin:null};
+
+/* ═══ 업비트 ═════════════════════════════════ */
+let krWs=null, krPoll=null, krPing=null, krRetry=0, krCodes=[];
+
+async function upbitMarkets(){
+  try{
+    const r = await fetch("https://api.upbit.com/v1/market/all?isDetails=false",{cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const all = await r.json();
+    const codes = [];
+    all.forEach(m=>{
+      if(!m.market.startsWith("KRW-")) return;
+      codes.push(m.market);
+      if(m.korean_name) name[m.market.slice(4)] = m.korean_name;
+    });
+    if(!codes.length) throw new Error("빈 응답");
+    return codes;
+  }catch(e){ return KRW_FALLBACK; }
+}
+
+function eatUpbit(t){
+  const s = t.code ? t.code.slice(4) : t.market.slice(4);
+  kr.set(s, {
+    p:+t.trade_price, chg:+t.signed_change_rate, vol:+t.acc_trade_price_24h,
+    hi:+t.high_price, lo:+t.low_price, y52:+t.highest_52_week_price||0
+  });
+  krMsgs++;
+}
+
+/* 전체 시세(ticker) + 고른 코인의 체결(trade)을 함께 구독 */
+function subscribeTrades(){
+  if(!krWs || krWs.readyState !== 1) return;
+  try{
+    krWs.send(JSON.stringify([
+      {ticket:"study-"+Date.now()},
+      {type:"ticker", codes:krCodes, isOnlyRealtime:false},
+      {type:"trade",  codes:["KRW-"+C.sym], isOnlyRealtime:true},
+      {format:"DEFAULT"}
+    ]));
+  }catch(e){}
+}
+
+async function upbitStart(){
+  krCodes = await upbitMarkets();
+  try{ krWs = new WebSocket("wss://api.upbit.com/websocket/v1"); }
+  catch(e){ return upbitPoll(); }
+  krWs.binaryType = "arraybuffer";
+
+  const guard = setTimeout(()=>{ if(!krWs || krWs.readyState!==1){ try{krWs.close();}catch(e){} upbitPoll(); } }, 8000);
+
+  krWs.onopen = ()=>{
+    clearTimeout(guard); krRetry=0;
+    if(krPoll){ clearInterval(krPoll); krPoll=null; }
+    subscribeTrades();
+    dg.upbit = "실시간 연결됨";
+    krPing = setInterval(()=>{ try{ krWs.send("PING"); }catch(e){} }, 60000);
+  };
+  krWs.onmessage = ev=>{
+    let t; try{
+      const raw = typeof ev.data==="string" ? ev.data : new TextDecoder("utf-8").decode(ev.data);
+      t = JSON.parse(raw);
+    }catch(e){ return; }
+    if(t.type==="ticker" && t.code) eatUpbit(t);
+    else if(t.type==="trade" && t.code === "KRW-"+C.sym){
+      pushTick({t:t.trade_timestamp||Date.now(), p:+t.trade_price, q:+t.trade_volume,
+                side:t.ask_bid, fresh:true});
+    }
+  };
+  krWs.onclose = ()=>{
+    clearTimeout(guard); clearInterval(krPing);
+    if(krMsgs===0){ dg.upbit=false; upbitPoll(); }
+    setTimeout(upbitStart, Math.min(30000, 1000*Math.pow(2,krRetry++)));
+  };
+  krWs.onerror = ()=>{};
+}
+
+function upbitPoll(){
+  if(krPoll) return;
+  const tick = async ()=>{
+    try{
+      const r = await fetch("https://api.upbit.com/v1/ticker/all?quote_currencies=KRW",{cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      (await r.json()).forEach(eatUpbit);
+      dg.upbit = "2초마다 새로 받는 중 (실시간 연결이 막혀 대체 방식 사용)";
+      try{                                  // 체결 기록도 REST로 대체
+        const tr = await fetch(`https://api.upbit.com/v1/trades/ticks?market=KRW-${C.sym}&count=20`,{cache:"no-store"});
+        if(tr.ok){
+          const list = await tr.json();
+          const seen = new Set(C.ticks.map(x=>x.id));
+          list.reverse().forEach(x=>{
+            if(seen.has(x.sequential_id)) return;
+            C.ticks.unshift({id:x.sequential_id, t:x.timestamp, p:+x.trade_price,
+                             q:+x.trade_volume, side:x.ask_bid, fresh:true});
+          });
+          C.ticks = C.ticks.slice(0,40);
+          drawTicks();
+        }
+      }catch(e){}
+    }catch(e){ dg.upbit = false; }
+  };
+  tick(); krPoll = setInterval(tick, 2000);
+}
+
+/* ═══ 바이낸스 ═══════════════════════════════ */
+let glWs=null, glPoll=null, glRetry=0;
+const BAD = /(UP|DOWN|BULL|BEAR)USDT$/;
+
+function glStart(){
+  try{ glWs = new WebSocket("wss://stream.binance.com:9443/ws/!miniTicker@arr"); }
+  catch(e){ return glPollStart(); }
+
+  const guard = setTimeout(()=>{ if(!glWs || glWs.readyState!==1){ try{glWs.close();}catch(e){} glPollStart(); } }, 8000);
+
+  glWs.onopen = ()=>{
+    clearTimeout(guard); glRetry=0;
+    if(glPoll){ clearInterval(glPoll); glPoll=null; }
+    dg.bin = "실시간 연결됨";
+  };
+  glWs.onmessage = ev=>{
+    let arr; try{ arr = JSON.parse(ev.data); }catch(e){ return; }
+    if(!Array.isArray(arr)) return;
+    arr.forEach(t=>{
+      const sym = t.s;
+      if(!sym.endsWith("USDT") || BAD.test(sym)) return;
+      const base = sym.slice(0,-4);
+      const c = +t.c, o = +t.o;
+      if(!c || !o) return;
+      gl.set(base, {p:c, chg:(c-o)/o, vol:+t.q});
+    });
+    glMsgs++;
+  };
+  glWs.onclose = ()=>{
+    clearTimeout(guard);
+    if(glMsgs===0){ dg.bin=false; glPollStart(); }
+    setTimeout(glStart, Math.min(30000, 1000*Math.pow(2,glRetry++)));
+  };
+  glWs.onerror = ()=>{};
+}
+
+function glPollStart(){
+  if(glPoll) return;
+  const tick = async ()=>{
+    try{
+      const r = await fetch("https://api.binance.com/api/v3/ticker/24hr",{cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      (await r.json()).forEach(t=>{
+        if(!t.symbol.endsWith("USDT") || BAD.test(t.symbol)) return;
+        gl.set(t.symbol.slice(0,-4), {p:+t.lastPrice, chg:+t.priceChangePercent/100, vol:+t.quoteVolume});
+      });
+      glMsgs++;
+      dg.bin = "10초마다 새로 받는 중 (실시간 연결이 막혀 대체 방식 사용)";
+    }catch(e){ dg.bin = false; }
+  };
+  tick(); glPoll = setInterval(tick, 10000);
+}
+
+/* ═══ 30일 흐름 ══════════════════════════════ */
+async function loadHistory(){
+  for(const s of CARDS){
+    try{
+      const r = await fetch(`https://api.upbit.com/v1/candles/days?market=KRW-${s}&count=30`,{cache:"no-store"});
+      if(!r.ok) continue;
+      const c = await r.json();
+      hist.set(s, c.map(d=>+d.trade_price).reverse());
+    }catch(e){}
+    await new Promise(r=>setTimeout(r,120));   // 호출 간격 여유
+  }
+}
+
+function sparkline(vals, rising){
+  if(!vals || vals.length<2) return "";
+  const w=100, h=34, min=Math.min(...vals), max=Math.max(...vals), sp=(max-min)||1;
+  const pt = vals.map((v,i)=>[ (i/(vals.length-1))*w, h - ((v-min)/sp)*h ]);
+  const line = pt.map(([x,y],i)=>(i?"L":"M")+x.toFixed(2)+" "+y.toFixed(2)).join(" ");
+  const area = line + ` L${w} ${h} L0 ${h} Z`;
+  const col = rising ? "var(--up)" : "var(--down)";
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${area}" fill="${col}" fill-opacity="0.10"></path>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+    <circle cx="${pt[pt.length-1][0].toFixed(2)}" cy="${pt[pt.length-1][1].toFixed(2)}" r="2" fill="${col}"></circle>
+  </svg>`;
+}
+
+/* ═══ 그리기 ═════════════════════════════════ */
+function mood(map, where, sub){
+  const all = [...map.values()].filter(d=>d.vol>0);
+  const u = all.filter(d=>d.chg>0).length, d = all.filter(d=>d.chg<0).length;
+  const n = u+d;
+  let verdict="자료 대기", vc="flat", read="아직 자료를 받는 중이에요.";
+  if(n){
+    const ratio = u/n;
+    const per10 = Math.round(ratio*10);
+    if(ratio>=0.7)      { verdict="오르는 쪽"; vc="up";   read=`10개 중 <b>${per10}개가 올랐어요</b>. 대부분이 같이 오르는 날이에요.`; }
+    else if(ratio>=0.55){ verdict="조금 오름"; vc="up";   read=`10개 중 <b>${per10}개가 올랐어요</b>. 오르는 쪽이 조금 더 많아요.`; }
+    else if(ratio>0.45) { verdict="반반";     vc="flat"; read=`오른 것과 내린 것이 <b>거의 반반</b>이에요. 방향이 정해지지 않은 날이에요.`; }
+    else if(ratio>0.3)  { verdict="조금 내림"; vc="down"; read=`10개 중 <b>${10-per10}개가 내렸어요</b>. 내리는 쪽이 조금 더 많아요.`; }
+    else                { verdict="내리는 쪽"; vc="down"; read=`10개 중 <b>${10-per10}개가 내렸어요</b>. 대부분이 같이 내리는 날이에요.`; }
+  }
+  return `<div class="mood-card">
+    <div class="mc-top"><div class="mc-where">${where}<small>${sub}</small></div>
+      <div class="mc-verdict ${vc}">${verdict}</div></div>
+    <div class="split"><i class="u" style="width:${n?u/n*100:0}%"></i><i class="d" style="width:${n?d/n*100:0}%"></i></div>
+    <p class="mc-read">${read}</p>
+    <div class="mc-nums"><span>오른 코인 ${u}개</span><span>내린 코인 ${d}개</span><span>전체 ${all.length}개</span></div>
+  </div>`;
+}
+
+function paint(){
+  /* 01 분위기 */
+  $("mood").innerHTML = mood(kr,"업비트","한국 · 원화") + mood(gl,"바이낸스","세계 1위 · 달러");
+
+  /* 환율 대용: 업비트 테더 시세 */
+  const usdt = kr.get("USDT");
+  const rate = usdt ? usdt.p : 0;
+  $("usdrate").textContent = rate ? `1달러 ≈ ${won(rate)}원으로 환산했어요` : "환산 기준을 받는 중";
+
+  /* 02 두 시장 비교 */
+  const rows = CMP.map(s=>{
+    const a = kr.get(s), b = gl.get(s);
+    if(!a || !b || !rate) return "";
+    const bWon = b.p*rate;
+    const gap = (a.p - bWon)/bWon;
+    const tag = gap>0.005 ? `<span class="tag u">한국이 비쌈</span>`
+              : gap<-0.005 ? `<span class="tag d">한국이 쌈</span>`
+              : `<span class="tag n">거의 같음</span>`;
+    return `<tr>
+      <td class="cname">${name[s]||s}<small>${s}</small></td>
+      <td class="big">${won(a.p)}</td>
+      <td class="big">${won(bWon)}</td>
+      <td class="chg ${cls(gap)}">${pctTxt(gap)} ${tag}</td>
+      <td class="chg ${cls(a.chg)}">${pctTxt1(a.chg)}</td>
+      <td class="chg ${cls(b.chg)}">${pctTxt1(b.chg)}</td>
+    </tr>`;
+  }).filter(Boolean).join("");
+  $("cmp").innerHTML = rows || `<tr><td colspan="6" style="text-align:center;color:var(--faint)">자료를 받는 중…</td></tr>`;
+
+  /* 03 추세 카드 */
+  $("coins").innerHTML = CARDS.map(s=>{
+    const a = kr.get(s);
+    if(!a) return "";
+    const h = hist.get(s);
+    const rising = h ? h[h.length-1] >= h[0] : a.chg>=0;
+    const mo = h ? (a.p - h[0])/h[0] : null;
+    const span = (a.hi-a.lo) || 1;
+    const pos = Math.min(100, Math.max(0, (a.p-a.lo)/span*100));
+    const posTxt = pos>=80 ? "오늘 비싼 편에서 거래되는 중"
+                 : pos>=55 ? "오늘 중간보다 위"
+                 : pos>=45 ? "오늘 중간쯤"
+                 : pos>=20 ? "오늘 중간보다 아래"
+                 : "오늘 싼 편에서 거래되는 중";
+    const from52 = a.y52 ? (a.p-a.y52)/a.y52 : null;
+    return `<div class="coin">
+      <div class="co-top">
+        <div class="co-id"><span class="co-kr">${name[s]||s}</span><span class="co-en">${s}</span></div>
+        <div class="co-price">
+          <div class="co-now">${won(a.p)}<span> 원</span></div>
+          <div class="co-chg ${cls(a.chg)}">어제보다 ${pctTxt1(a.chg)}</div>
+        </div>
+      </div>
+      ${sparkline(h, rising)}
+      <div class="rowline">
+        <div class="rl-head"><span>오늘 하루 어디쯤</span><b>${posTxt}</b></div>
+        <div class="rl-track"><span class="rl-mark" style="left:calc(${pos}% - 1.5px)"></span></div>
+        <div class="rl-ends"><span>오늘 가장 싼 값 ${won(a.lo)}</span><span>가장 비싼 값 ${won(a.hi)}</span></div>
+      </div>
+      <div class="co-reads">
+        <div><span class="b">30일</span><span>${mo===null?"흐름 자료를 받는 중":
+          `한 달 전보다 <b class="${cls(mo)}">${pctTxt1(mo)}</b> ${mo>=0?"높아요":"낮아요"} — ${rising?"오르는 흐름":"내리는 흐름"}`}</span></div>
+        <div><span class="b">1년</span><span>${from52===null?"자료 없음":
+          `1년 중 가장 비쌌던 ${won(a.y52)}원보다 <b>${Math.abs(from52*100).toFixed(0)}% ${from52<0?"싸요":"비싸요"}</b>`}</span></div>
+        <div><span class="b">거래</span><span>하루 동안 <b>${money(a.vol)}</b>어치가 오갔어요</span></div>
+      </div>
+    </div>`;
+  }).filter(Boolean).join("");
+
+  /* 04 자금 흐름 */
+  const top = [...kr.entries()].map(([s,d])=>({s,...d}))
+    .filter(d=>d.s!=="USDT").sort((a,b)=>b.vol-a.vol).slice(0,FLOW_N);
+  if(top.length){
+    const max = top[0].vol;
+    const sum = [...kr.values()].reduce((x,d)=>x+d.vol,0);
+    $("flow").innerHTML = top.map(d=>`
+      <div class="fl-row">
+        <span class="fl-name">${name[d.s]||d.s}</span>
+        <span class="fl-bar"><i style="width:${d.vol/max*100}%"></i></span>
+        <span class="fl-val">${money(d.vol)}</span>
+      </div>`).join("")
+      + `<p style="margin:14px 0 0;font-size:13px;color:var(--faint)">업비트 원화 시장 전체에서 하루 동안 ${money(sum)}어치가 거래됐고,
+         위 10개가 그중 <b style="color:var(--ink)">${Math.round(top.reduce((x,d)=>x+d.vol,0)/sum*100)}%</b>를 차지해요.</p>`;
+  }
+
+  /* 연결 상태 */
+  const okKr = krMsgs>0, okGl = glMsgs>0;
+  const dot = $("dot"), conn = $("conn");
+  if(okKr && okGl){ dot.className="dot on"; conn.textContent = "업비트·바이낸스 모두 연결됨 · 계속 갱신 중"; }
+  else if(okKr || okGl){ dot.className="dot warn"; conn.textContent = (okKr?"업비트만":"바이낸스만")+" 연결됨 · 아래 점검 내용을 확인하세요"; }
+  else { dot.className="dot off"; conn.textContent = "아직 시세를 받지 못했어요 · 아래 점검 내용을 확인하세요"; }
+
+  try{ tickChart(); drawChart(); }catch(e){ console.warn("chart", e); }
+  try{ movers(); }catch(e){ console.warn("movers", e); }
+  paintDiag(okKr, okGl);
+}
+
+/* ═══ 점검 패널 ══════════════════════════════ */
+function paintDiag(okKr, okGl){
+  const box = $("diag");
+  if(okKr && okGl){ box.hidden = true; return; }
+  box.hidden = false;
+
+  const local = location.protocol==="file:";
+  $("d-loc").textContent = local ? "내 컴퓨터의 파일로 열림 (정상)" : location.protocol+"//"+location.host;
+  $("d-loc").className = local ? "ok" : "wait";
+
+  const put = (id, ok, msg) => { const e=$(id); e.textContent = msg; e.className = ok===true?"ok":ok===false?"bad":"wait"; };
+  put("d-upbit", okKr ? true : dg.upbit===false ? false : null,
+      okKr ? (typeof dg.upbit==="string"?dg.upbit:"연결됨") : dg.upbit===false ? "연결 실패 (차단된 것 같아요)" : "연결 중…");
+  put("d-bin", okGl ? true : dg.bin===false ? false : null,
+      okGl ? (typeof dg.bin==="string"?dg.bin:"연결됨") : dg.bin===false ? "연결 실패 (차단된 것 같아요)" : "연결 중…");
+
+  const fix = $("d-fix");
+  if(!okKr && !okGl){
+    fix.innerHTML = "<b>양쪽 다 막혀 있어요.</b> 이 파일을 채팅 앱 안의 미리보기로 열면 외부 접속이 전부 차단돼 시세를 받을 수 없습니다. "
+      + "파일을 <b>내 컴퓨터에 저장한 뒤 크롬으로 직접 열어</b> 주세요. 그래도 안 되면 회사 네트워크나 광고 차단 확장 기능이 막는 경우이니, 시크릿 창이나 개인 인터넷으로 한 번 시도해 보세요.";
+  }else if(!okGl){
+    fix.innerHTML = "바이낸스만 연결되지 않았어요. 일부 국내 통신망이나 회사 네트워크에서 바이낸스 접속을 막습니다. "
+      + "업비트 자료로 볼 수 있는 부분은 그대로 나오지만, <b>두 시장 비교는 비어 있게</b> 됩니다.";
+  }else{
+    fix.innerHTML = "업비트만 연결되지 않았어요. 잠시 후 자동으로 다시 시도합니다.";
+  }
+}
+
+
+/* ═══ 차트창 ═════════════════════════════════ */
+const UNITS = [
+  {k:"1",  label:"1분",  path:s=>`minutes/1?market=KRW-${s}&count=200`,   ms:60e3,        tf:"hm"},
+  {k:"3",  label:"3분",  path:s=>`minutes/3?market=KRW-${s}&count=200`,   ms:3*60e3,      tf:"hm"},
+  {k:"5",  label:"5분",  path:s=>`minutes/5?market=KRW-${s}&count=200`,   ms:5*60e3,      tf:"hm"},
+  {k:"15", label:"15분", path:s=>`minutes/15?market=KRW-${s}&count=200`,  ms:15*60e3,     tf:"hm"},
+  {k:"60", label:"1시간",path:s=>`minutes/60?market=KRW-${s}&count=200`,  ms:60*60e3,     tf:"hm"},
+  {k:"D",  label:"1일",  path:s=>`days?market=KRW-${s}&count=200`,        ms:24*3600e3,   tf:"md"},
+];
+const C = {
+  sym:"BTC", unit:"5",
+  bars:[],            // {t,o,h,l,c,v}
+  ticks:[],           // {t,p,q,side,fresh}
+  view:70,            // 보이는 막대 수
+  off:0,              // 오른쪽에서 얼마나 과거로 밀렸는지
+  hover:null,
+  loading:true, err:null,
+  drag:null,
+};
+const unitOf = () => UNITS.find(u=>u.k===C.unit);
+const AXW = 92;            // 오른쪽 가격축 폭 (원화는 자릿수가 길다)
+
+function stamp(ms, mode){
+  const d = new Date(ms), z = n => String(n).padStart(2,"0");
+  return mode==="md" ? `${d.getMonth()+1}/${d.getDate()}` : `${z(d.getHours())}:${z(d.getMinutes())}`;
+}
+function clockS(ms){ const d=new Date(ms),z=n=>String(n).padStart(2,"0");
+  return `${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`; }
+function qty(v){ return v>=1000 ? Math.round(v).toLocaleString("ko-KR")
+  : v>=1 ? v.toFixed(3) : v.toFixed(6); }
+function axisNum(v){                    // 축에 들어갈 짧은 표기
+  if(v>=1e8) return (v/1e8).toFixed(3)+"억";
+  if(v>=1e4) return Math.round(v).toLocaleString("ko-KR");
+  return v>=100 ? Math.round(v).toLocaleString("ko-KR") : v.toPrecision(4);
+}
+function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+
+/* ── 막대 자료 받기 ── */
+async function loadChart(){
+  const u = unitOf();
+  C.loading = true; C.err = null; C.off = 0; C.hover = null; paintChart();
+  try{
+    const r = await fetch(`https://api.upbit.com/v1/candles/${u.path(C.sym)}`,{cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const raw = await r.json();
+    C.bars = raw.map(c=>({
+      t:new Date(c.candle_date_time_kst+"+09:00").getTime(),
+      o:+c.opening_price, h:+c.high_price, l:+c.low_price, c:+c.trade_price,
+      v:+c.candle_acc_trade_price || 0
+    })).reverse();
+    if(!C.bars.length) throw new Error("자료 없음");
+  }catch(e){ C.err = e.message; C.bars = []; }
+  C.loading = false;
+  paintChart();
+}
+
+/* ── 실시간으로 마지막 막대 갱신 ── */
+function feedPrice(price, vol){
+  if(!C.bars.length) return;
+  const u = unitOf();
+  const slot = Math.floor(Date.now()/u.ms)*u.ms;
+  let last = C.bars[C.bars.length-1];
+  if(slot > last.t){
+    C.bars.push({t:slot, o:price, h:price, l:price, c:price, v:vol||0});
+    if(C.bars.length > 400) C.bars.shift();
+  }else{
+    last.c = price;
+    if(price > last.h) last.h = price;
+    if(price < last.l) last.l = price;
+    if(vol) last.v += vol;
+  }
+}
+function tickChart(){                       // paint()가 매 주기 호출
+  const a = kr.get(C.sym);
+  if(a) feedPrice(a.p, 0);
+}
+
+/* ── 체결 기록 ── */
+function pushTick(t){
+  C.ticks.unshift(t);
+  if(C.ticks.length > 40) C.ticks.pop();
+  feedPrice(t.p, t.p*t.q);
+  drawTicks();
+}
+function drawTicks(){
+  const box = $("tp-rows");
+  if(!C.ticks.length){ box.innerHTML = `<p class="tp-empty">기다리는 중… 거래가 일어나면 여기에 올라옵니다.</p>`; return; }
+  box.innerHTML = C.ticks.map(t=>`
+    <div class="tk ${t.side==="BID"?"buy":"sell"}${t.fresh?" fresh":""}">
+      <span class="tt">${clockS(t.t)}</span>
+      <span class="tp">${won(t.p)}</span>
+      <span class="tq">${qty(t.q)}</span>
+      <span class="ts">${t.side==="BID"?"사는 쪽":"파는 쪽"}</span>
+    </div>`).join("");
+  C.ticks.forEach(t=>t.fresh=false);
+}
+
+/* ── 차트 그리기 ── */
+const cv = $("cv");
+const ctx = cv.getContext("2d");
+
+function paintChart(){
+  const u = unitOf();
+  $("cb-name").textContent = name[C.sym] || C.sym;
+  $("cb-sym").textContent  = C.sym + " · 업비트 원화 · " + u.label + " 막대";
+  $("tp-sub").textContent  = (name[C.sym]||C.sym) + " 실제 거래 기록";
+
+  const a = kr.get(C.sym);
+  if(a){
+    $("cb-price").innerHTML = won(a.p) + "<small> 원</small>";
+    $("cb-delta").className = "cb-delta " + cls(a.chg);
+    $("cb-delta").textContent = "어제보다 " + pctTxt1(a.chg);
+  }
+
+  const msg = $("cv-msg");
+  if(C.loading){ msg.hidden=false; msg.textContent="차트를 불러오는 중…"; return; }
+  if(C.err || C.bars.length<2){ msg.hidden=false; msg.textContent="차트 자료를 받지 못했어요 ("+(C.err||"자료 부족")+")"; return; }
+  msg.hidden = true;
+
+  /* 캔버스 크기 */
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth, h = cv.clientHeight;
+  if(cv.width !== Math.round(w*dpr) || cv.height !== Math.round(h*dpr)){
+    cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,w,h);
+
+  const AX = AXW;                    // 오른쪽 가격축 폭
+  const PL = 4, PT = 8, PB = 20;
+  const plotW = w - PL - AX;
+  const priceH = Math.round((h-PT-PB) * 0.74);
+  const gap    = 14;
+  const volH   = (h-PT-PB) - priceH - gap;
+  const volTop = PT + priceH + gap;
+
+  /* 보이는 구간 */
+  const total = C.bars.length;
+  const view = Math.min(C.view, total);
+  const end = Math.max(view, total - C.off);
+  const start = end - view;
+  const shown = C.bars.slice(start, end);
+
+  let lo = Infinity, hi = -Infinity, vmax = 0;
+  shown.forEach(b=>{ if(b.l<lo) lo=b.l; if(b.h>hi) hi=b.h; if(b.v>vmax) vmax=b.v; });
+  const pad = (hi-lo)*0.08 || hi*0.001 || 1;
+  lo -= pad; hi += pad;
+
+  const bw = plotW/view;
+  const bodyW = Math.max(1, Math.min(14, bw*0.66));
+  const X = i => PL + (i+0.5)*bw;
+  const Y = v => PT + (1-(v-lo)/(hi-lo))*priceH;
+  const VY = v => volTop + volH - (vmax?(v/vmax)*volH:0);
+
+  const cUp = cssVar("--up"), cDown = cssVar("--down");
+  const cLine = cssVar("--line-2"), cFaint = cssVar("--faint"), cInk = cssVar("--ink");
+  const cCard = cssVar("--card");
+
+  /* 가로 눈금 + 가격축 */
+  ctx.font = '10.5px "IBM Plex Mono", monospace';
+  ctx.textBaseline = "middle";
+  for(let k=0;k<=4;k++){
+    const v = lo + (hi-lo)*k/4, y = Math.round(Y(v))+0.5;
+    ctx.strokeStyle = cLine; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(PL+plotW,y); ctx.stroke();
+    ctx.fillStyle = cFaint; ctx.textAlign = "left";
+    ctx.fillText(axisNum(v), PL+plotW+7, y);
+  }
+  /* 거래량 영역 밑선 */
+  ctx.strokeStyle = cLine; ctx.beginPath();
+  ctx.moveTo(PL, volTop+volH+0.5); ctx.lineTo(PL+plotW, volTop+volH+0.5); ctx.stroke();
+
+  /* 시간축 */
+  const step = Math.max(1, Math.round(view/6));
+  ctx.textAlign = "center"; ctx.fillStyle = cFaint;
+  ctx.textBaseline = "top";
+  shown.forEach((b,i)=>{
+    if(i % step) return;
+    ctx.fillText(stamp(b.t, u.tf), X(i), h-PB+5);
+  });
+
+  /* 막대 */
+  shown.forEach((b,i)=>{
+    const up = b.c >= b.o;
+    const col = up ? cUp : cDown;
+    const x = X(i);
+    ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(x)+0.5, Y(b.h)); ctx.lineTo(Math.round(x)+0.5, Y(b.l)); ctx.stroke();
+    const y1 = Y(Math.max(b.o,b.c)), y2 = Y(Math.min(b.o,b.c));
+    ctx.fillRect(x-bodyW/2, y1, bodyW, Math.max(1, y2-y1));
+    /* 거래량 */
+    ctx.globalAlpha = 0.32;
+    ctx.fillRect(x-bodyW/2, VY(b.v), bodyW, volTop+volH-VY(b.v));
+    ctx.globalAlpha = 1;
+  });
+
+  /* 현재가 점선 */
+  const cur = shown[shown.length-1].c;
+  const cy = Math.round(Y(cur))+0.5;
+  const curUp = shown[shown.length-1].c >= shown[shown.length-1].o;
+  ctx.strokeStyle = curUp ? cUp : cDown; ctx.setLineDash([4,4]); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(PL,cy); ctx.lineTo(PL+plotW,cy); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = curUp ? cUp : cDown;
+  ctx.fillRect(PL+plotW+2, cy-9, AX-4, 18);
+  ctx.fillStyle = cCard; ctx.textAlign="left"; ctx.textBaseline="middle";
+  ctx.fillText(won(cur), PL+plotW+7, cy);
+
+  /* 십자선 */
+  let info = shown[shown.length-1], live = true;
+  if(C.hover !== null){
+    const i = Math.max(0, Math.min(view-1, Math.floor((C.hover.x-PL)/bw)));
+    info = shown[i]; live = (i === view-1);
+    const x = Math.round(X(i))+0.5;
+    ctx.strokeStyle = cFaint; ctx.setLineDash([3,3]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x,PT); ctx.lineTo(x,volTop+volH); ctx.stroke();
+    if(C.hover.y>PT && C.hover.y<PT+priceH){
+      const y = Math.round(C.hover.y)+0.5;
+      ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(PL+plotW,y); ctx.stroke();
+      const v = lo + (1-(y-PT)/priceH)*(hi-lo);
+      ctx.setLineDash([]);
+      ctx.fillStyle = cInk; ctx.fillRect(PL+plotW+2, y-9, AX-4, 18);
+      ctx.fillStyle = cCard; ctx.fillText(won(v), PL+plotW+7, y);
+    }
+    ctx.setLineDash([]);
+  }
+
+  /* 상단 값 표시 */
+  if(info){
+    const chg = (info.c-info.o)/info.o;
+    $("ohlc").innerHTML =
+      `<span class="lbl">${stamp(info.t,u.tf)}${live?" (지금 만들어지는 중)":""}</span>`
+      + `<span class="lbl">시작<b>${won(info.o)}</b></span>`
+      + `<span class="lbl">최고<b>${won(info.h)}</b></span>`
+      + `<span class="lbl">최저<b>${won(info.l)}</b></span>`
+      + `<span class="lbl">끝<b class="${cls(chg)}">${won(info.c)}</b></span>`
+      + `<span class="lbl">이 막대<b class="${cls(chg)}">${pctTxt(chg)}</b></span>`
+      + `<span class="lbl">거래<b>${money(info.v)}</b></span>`;
+  }
+
+  /* 한 줄 해석 */
+  const first = shown[0].o, chgAll = (cur-first)/first;
+  const spanTxt = `막대 ${view}개(${u.label} 기준)`;
+  const mag = Math.abs(chgAll*100);
+  let say;
+  if(mag < 0.5)     say = `보이는 구간(${spanTxt}) 동안 <b>거의 제자리</b>예요 (${pctTxt1(chgAll)}).`;
+  else if(mag < 3)  say = `보이는 구간(${spanTxt}) 동안 <b>${pctTxt1(chgAll)}</b> ${chgAll>0?"올랐어요":"내렸어요"}. 흔히 있는 크기예요.`;
+  else if(mag < 10) say = `보이는 구간(${spanTxt}) 동안 <b>${pctTxt1(chgAll)}</b> ${chgAll>0?"올랐어요":"내렸어요"}. 꽤 큰 움직임이라 이유가 있을 수 있어요.`;
+  else              say = `보이는 구간(${spanTxt}) 동안 <b>${pctTxt1(chgAll)}</b> ${chgAll>0?"올랐어요":"내렸어요"}. <b>매우 큰 움직임</b>이라 되돌아가는 폭도 클 수 있어요.`;
+  const tails = shown.slice(-10).filter(b=>{
+    const body = Math.abs(b.c-b.o), full = b.h-b.l;
+    return full>0 && body/full < 0.35;
+  }).length;
+  if(tails >= 6) say += ` 최근 막대들이 <b>꼬리만 길고 몸통이 짧아요</b> — 방향을 못 잡고 흔들리는 구간이에요.`;
+  $("cb-say").innerHTML = say;
+}
+const drawChart = paintChart;      // paint()에서 쓰는 이름 유지
+
+/* ── 마우스 조작 ── */
+cv.addEventListener("mousemove", e=>{
+  const r = cv.getBoundingClientRect();
+  if(C.drag){
+    const dx = e.clientX - C.drag.x;
+    const bw = (r.width-AXW-4)/Math.min(C.view, C.bars.length||1);
+    const moved = Math.round(dx/bw);
+    C.off = Math.max(0, Math.min(Math.max(0,C.bars.length-C.view), C.drag.off + moved));
+  }
+  C.hover = {x:e.clientX-r.left, y:e.clientY-r.top};
+  paintChart();
+});
+cv.addEventListener("mouseleave", ()=>{ C.hover=null; C.drag=null; paintChart(); });
+cv.addEventListener("mousedown", e=>{ C.drag={x:e.clientX, off:C.off}; });
+window.addEventListener("mouseup", ()=>{ C.drag=null; });
+cv.addEventListener("wheel", e=>{
+  e.preventDefault();
+  C.view = Math.max(20, Math.min(200, Math.round(C.view * (e.deltaY>0 ? 1.12 : 0.89))));
+  C.off = Math.max(0, Math.min(Math.max(0,C.bars.length-C.view), C.off));
+  paintChart();
+}, {passive:false});
+window.addEventListener("resize", ()=>paintChart());
+
+/* ── 선택 버튼 ── */
+function chips(){
+  const quick = CARDS.includes(C.sym) ? CARDS : [C.sym, ...CARDS];
+  const opts = [...kr.entries()].sort((a,b)=>b[1].vol-a[1].vol).map(([sym])=>sym)
+    .filter(sym=>!quick.includes(sym));
+  $("pick-coin").innerHTML = quick.map(s=>
+    `<button class="chip" type="button" data-coin="${s}" aria-pressed="${s===C.sym}">${name[s]||s}</button>`).join("")
+    + `<select class="coin-sel" id="coin-sel" aria-label="다른 코인 고르기">
+        <option value="">다른 코인…</option>
+        ${opts.map(sym=>`<option value="${sym}">${name[sym]||sym}</option>`).join("")}
+       </select>`;
+  $("pick-span").innerHTML = UNITS.map(u=>
+    `<button class="chip" type="button" data-unit="${u.k}" aria-pressed="${u.k===C.unit}">${u.label}</button>`).join("");
+}
+document.addEventListener("change", e=>{
+  if(e.target.id === "coin-sel" && e.target.value) openInChart(e.target.value);
+});
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button.chip");
+  if(!b) return;
+  if(b.dataset.coin){ C.sym = b.dataset.coin; C.ticks = []; drawTicks(); subscribeTrades(); }
+  else if(b.dataset.unit){ C.unit = b.dataset.unit; }
+  chips(); loadChart();
+});
+
+/* ═══ 방금 움직인 코인 ═══════════════════════ */
+const prevSeen = new Map();  // SYM -> {p,t}  (직전에 본 값)
+const MV_WINDOW = 30e3;     // 30초 간격으로 비교
+const MV_MIN    = 0.0015;   // 0.15% 이상 움직였으면 알림
+const miniCache = new Map();   // SYM -> {at, pts:[]}
+
+async function miniHistory(sym){
+  const c = miniCache.get(sym);
+  if(c && Date.now()-c.at < 60e3) return c.pts;
+  try{
+    const r = await fetch(`https://api.upbit.com/v1/candles/minutes/1?market=KRW-${sym}&count=40`,{cache:"no-store"});
+    if(!r.ok) throw new Error();
+    const pts = (await r.json()).map(x=>+x.trade_price).reverse();
+    miniCache.set(sym, {at:Date.now(), pts});
+    return pts;
+  }catch(e){ return null; }
+}
+
+function miniSpark(pts, rising){
+  if(!pts || pts.length<2) return `<div style="height:44px"></div>`;
+  const w=100, h=30, mn=Math.min(...pts), mx=Math.max(...pts), sp=(mx-mn)||1;
+  const P = pts.map((v,i)=>[(i/(pts.length-1))*w, h-((v-mn)/sp)*h]);
+  const line = P.map(([x,y],i)=>(i?"L":"M")+x.toFixed(2)+" "+y.toFixed(2)).join(" ");
+  const col = rising ? "var(--up)" : "var(--down)";
+  return `<svg class="mspark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <path d="${line} L${w} ${h} L0 ${h} Z" fill="${col}" fill-opacity="0.10"></path>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="1.4" vector-effect="non-scaling-stroke"></path>
+    <circle cx="${P[P.length-1][0].toFixed(2)}" cy="${P[P.length-1][1].toFixed(2)}" r="2" fill="${col}"></circle>
+  </svg>`;
+}
+
+function movers(){
+  const now = Date.now();
+  const moved = [];
+  kr.forEach((d,s)=>{
+    if(d.vol < 1e9) return;                       // 거래가 적은 코인은 제외
+    const seen = prevSeen.get(s);
+    if(!seen){ prevSeen.set(s, {p:d.p, t:now}); return; }
+    if(now - seen.t < MV_WINDOW) return;
+    const step = (d.p - seen.p)/seen.p;
+    if(Math.abs(step) >= MV_MIN) moved.push({s, step});
+    prevSeen.set(s, {p:d.p, t:now});
+  });
+
+  if(moved.length){
+    movers.last = moved.sort((a,b)=>Math.abs(b.step)-Math.abs(a.step)).slice(0,3);
+    movers.at = now;
+    movers.last.forEach(m=>miniHistory(m.s).then(()=>movers.render&&movers.render()));
+  }
+
+  movers.render = ()=>{
+    const box = $("movers");
+    if(!movers.last || Date.now() - (movers.at||0) > 5*60e3){
+      box.innerHTML = `<div class="mv quiet" style="cursor:default">최근 30초 동안 크게 움직인 코인이 없어요. 시장이 조용한 상태예요.</div>`;
+      return;
+    }
+    box.innerHTML = movers.last.map(m=>{
+      const a = kr.get(m.s);
+      const pts = miniCache.get(m.s)?.pts;
+      return `<div class="mv" role="button" tabindex="0" data-mover="${m.s}"
+                   aria-label="${name[m.s]||m.s} 차트창에서 보기">
+        <span class="n">${name[m.s]||m.s}</span>
+        <span class="v ${cls(m.step)}">${pctTxt1(m.step)}</span>
+        <span class="w">30초 사이 ${m.step>0?"올랐어요":"내렸어요"} · 지금 ${a?won(a.p)+"원":"—"}</span>
+        ${miniSpark(pts, m.step>0)}
+        <span class="w" style="font-size:11px">최근 40분 흐름</span>
+        <span class="go">눌러서 차트창에서 보기 →</span>
+      </div>`;
+    }).join("");
+  };
+  movers.render();
+}
+
+/* 카드를 누르면 위 차트창에 그 코인을 띄운다 */
+function openInChart(sym){
+  if(!kr.has(sym)) return;
+  C.sym = sym; C.ticks = []; drawTicks(); subscribeTrades();
+  chips(); loadChart();
+  document.querySelector(".chart-box").scrollIntoView({behavior:"smooth", block:"start"});
+}
+document.addEventListener("click", e=>{
+  const card = e.target.closest("[data-mover]");
+  if(card) openInChart(card.dataset.mover);
+});
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const card = e.target.closest && e.target.closest("[data-mover]");
+  if(card){ e.preventDefault(); openInChart(card.dataset.mover); }
+});
+
+/* ═══ 시작 ═══════════════════════════════════ */
+paintDiag(false,false);
+chips();
+setInterval(paint, PAINT_MS);
+upbitStart();
+glStart();
+loadChart();
+drawTicks();
+setInterval(loadChart, 3*60*1000);        // 원본 자료를 3분마다 다시 맞춤
+loadHistory().then(()=>{ chips(); paint(); });
+setInterval(loadHistory, 10*60*1000);
+</script>
 </body>
+</html>
