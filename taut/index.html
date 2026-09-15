@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.92em' font-size='92'%3E%CE%B2%3C/text%3E%3C/svg%3E">
 <title>taut — 테슬라 오너 카드뉴스</title>
-<meta name="description" content="테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것, 숨어 있는 기능들.">
+<meta name="description" content="테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것, 충전 요금, 숨은 기능들.">
 <meta property="og:title" content="taut — 테슬라 오너 카드뉴스">
-<meta property="og:description" content="인수 전후에 챙길 것, 숨어 있는 기능들.">
+<meta property="og:description" content="인수 전후에 챙길 것, 충전 요금, 숨은 기능들.">
 <meta property="og:image" content="/taut/cards/1/01.png">
 <style>
   :root{
@@ -17,11 +17,9 @@
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0;background:var(--bg);color:var(--fg);font-family:var(--mono);
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--mono);
     font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;
-    word-break:keep-all;overflow-wrap:break-word;
-  }
+    word-break:keep-all;overflow-wrap:break-word}
   .wrap{max-width:820px;margin:0 auto;padding:0 20px}
   a{color:var(--acc)}
   header{padding:64px 0 32px;border-bottom:1px solid var(--line)}
@@ -31,58 +29,26 @@
   .tag{margin:16px 0 0;color:var(--dim);max-width:40ch;text-wrap:balance}
   .note{margin:20px 0 0;font-size:12.5px;color:var(--faint);
         border-left:2px solid var(--line);padding-left:12px}
-
   .ep{padding:40px 0;border-bottom:1px solid var(--line)}
-  .ep-no{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-  h2{font-size:clamp(20px,5vw,26px);font-weight:700;letter-spacing:-.02em;
+  .ep-no{font-size:12px;letter-spacing:.14em;color:var(--faint)}
+  .until{display:inline-block;font-size:11px;letter-spacing:.06em;color:var(--acc);
+         border:1px solid var(--acc);border-radius:99px;padding:2px 9px;margin:8px 0 0}
+  h2{font-size:clamp(19px,4.6vw,25px);font-weight:700;letter-spacing:-.02em;
      line-height:1.35;margin:8px 0 4px;text-wrap:balance}
   .meta{font-size:12.5px;color:var(--faint);margin:0 0 20px}
-
-  /* 카드 스트립 — 인스타 캐러셀처럼 옆으로 밀어서 봄 */
-  .cards{
-    display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+  .cards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
     scroll-padding-left:20px;padding:0 20px 14px;margin:0 -20px;
-    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
-  }
-  .cards img{
-    flex:0 0 min(80%,320px);width:min(80%,320px);height:auto;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  .cards img{flex:0 0 min(80%,320px);width:min(80%,320px);height:auto;
     scroll-snap-align:start;border-radius:10px;border:1px solid var(--line);
-    background:var(--panel);
-  }
+    background:var(--panel)}
   .hint{font-size:12px;color:var(--faint);margin:0 0 20px}
-
-  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-          padding:14px 18px}
-  summary{cursor:pointer;font-size:13px;color:var(--dim);letter-spacing:-.01em}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+  summary{cursor:pointer;font-size:13px;color:var(--dim)}
   summary:hover{color:var(--fg)}
-  .caption{white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:var(--fg);
-           margin:16px 0 0}
+  .caption{white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:var(--fg);margin:16px 0 0}
   .tags{margin:16px 0 0;font-size:12.5px;color:var(--faint);line-height:1.8}
-  .todo{color:var(--faint);font-size:13px;margin:0}
-
-  .fact{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-        padding:18px 20px;margin:0 0 12px}
-  .fact h3{font-size:15px;font-weight:700;letter-spacing:-.02em;margin:0 0 10px}
-  .fact p{margin:0 0 10px;font-size:13.5px;line-height:1.75;color:var(--dim)}
-  .fact p:last-child{margin-bottom:0}
-  .fact strong{color:var(--fg);font-weight:600}
-  .fact table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px}
-  .fact th,.fact td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
-                    vertical-align:top}
-  .fact th{color:var(--faint);font-weight:600;font-size:11.5px;letter-spacing:.04em}
-  .fact td.n{text-align:right;white-space:nowrap;color:var(--fg)}
-  .src{font-size:11.5px;color:var(--faint);margin:12px 0 0;line-height:1.7}
-  .src a{color:var(--faint);text-decoration:underline;text-underline-offset:2px}
-  .src a:hover{color:var(--acc)}
-  .now{border-color:var(--acc)}
-  .now h3::before{content:"지금 ";color:var(--acc)}
-  .until{display:inline-block;font-size:11px;letter-spacing:.06em;color:var(--acc);
-         border:1px solid var(--acc);border-radius:99px;padding:2px 9px;margin:0 0 10px}
-  .soon{display:grid;gap:8px;margin:0}
-  .soon div{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;
-            font-size:13.5px;color:var(--dim);padding:10px 0;border-bottom:1px solid var(--line)}
-  .soon div:last-child{border-bottom:0}
-  .soon b{color:var(--faint);font-weight:600;font-size:11.5px;letter-spacing:.06em}
+  .todo{color:var(--faint);font-size:13px;margin:12px 0 0}
   footer{padding:36px 0 64px;color:var(--faint);font-size:12.5px}
   footer p{margin:0 0 6px}
 </style>
@@ -93,99 +59,69 @@
   <header>
     <a class="back" href="/">← beta4eva</a>
     <h1>taut</h1>
-    <p class="tag">테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것부터.</p>
-    <p class="note">제도와 요금은 해마다, 지역마다 바뀐다. 출처를 밝힌 것만 적고,
-    확인이 덜 된 건 올리지 않는다. 그래도 내 지역 공고는 직접 봐야 한다.</p>
+    <p class="tag">테슬라 오너를 위한 카드뉴스. 인수부터 충전까지.</p>
+    <p class="note">제도와 요금은 해마다, 지역마다 바뀐다. 출처로 교차 확인한 것만 카드로 만들고,
+    확인이 덜 된 건 넣지 않았다. 그래도 내 지역 공고는 직접 봐야 한다.</p>
   </header>
 
   <section class="ep">
     <div class="ep-no">01</div>
-    <h2>테슬라 주문했는데 뭐부터 해요?</h2>
+    <h2>주문 다음에 뭘 할지는 아무도 알려주지 않는다</h2>
     <p class="meta">차 받기 전 체크리스트 5 · 카드 8장</p>
     <div class="cards">
-      <img src="cards/1/01.png" width="1080" height="1350" alt="테슬라 주문했는데 뭐부터 해요? — 표지" loading="lazy">
-      <img src="cards/1/02.png" width="1080" height="1350" alt="1편 카드 2" loading="lazy">
-      <img src="cards/1/03.png" width="1080" height="1350" alt="1편 카드 3" loading="lazy">
-      <img src="cards/1/04.png" width="1080" height="1350" alt="1편 카드 4" loading="lazy">
-      <img src="cards/1/05.png" width="1080" height="1350" alt="1편 카드 5" loading="lazy">
-      <img src="cards/1/06.png" width="1080" height="1350" alt="1편 카드 6" loading="lazy">
-      <img src="cards/1/07.png" width="1080" height="1350" alt="1편 카드 7" loading="lazy">
-      <img src="cards/1/08.png" width="1080" height="1350" alt="1편 카드 8" loading="lazy">
+      <img src="cards/1/01.png" width="1080" height="1350" alt="1편 1번째 카드" loading="lazy">
+      <img src="cards/1/02.png" width="1080" height="1350" alt="1편 2번째 카드" loading="lazy">
+      <img src="cards/1/03.png" width="1080" height="1350" alt="1편 3번째 카드" loading="lazy">
+      <img src="cards/1/04.png" width="1080" height="1350" alt="1편 4번째 카드" loading="lazy">
+      <img src="cards/1/05.png" width="1080" height="1350" alt="1편 5번째 카드" loading="lazy">
+      <img src="cards/1/06.png" width="1080" height="1350" alt="1편 6번째 카드" loading="lazy">
+      <img src="cards/1/07.png" width="1080" height="1350" alt="1편 7번째 카드" loading="lazy">
+      <img src="cards/1/08.png" width="1080" height="1350" alt="1편 8번째 카드" loading="lazy">
     </div>
-    <p class="hint">← 옆으로 밀어서 보세요</p>
-    <details>
-      <summary>캡션 보기</summary>
-      <p class="caption">테슬라 주문하고 나면 그다음이 잘 안 보이죠.
-차 받기 전에 챙길 것만 다섯 개로 모았어요.
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="caption">테슬라를 주문하면 5분 만에 끝난다. 차가 오기까지는 몇 주가 걸리는데, 그 사이에 뭘 해야 하는지는 아무도 알려주지 않는다. 인도 전에 끝내둬야 할 것 다섯 개를 모았다.
 
-보조금은 계약한 날이 아니라 차를 받는 날로 줄을 서요.
-그래서 인도가 밀리면 예산이 먼저 떨어질 수도 있어요.
-금액은 해마다, 지자체마다 다르니까 내 지역 공고를 꼭 보세요.
+보조금은 계약한 날이 아니라 차를 받는 날을 기준으로 줄을 선다. 그래서 인도가 밀리면 순번도 같이 밀리고, 그 사이 지자체 예산이 먼저 끊길 수 있다. 금액도 조건도 지역마다 달라서 결국 내 지역 공고를 직접 봐야 한다.
 
-차값은 카드로도, 캐피탈 할부로도, 현금으로도 낼 수 있어요.
-조건이 다 다르고 한도나 심사에 시간이 걸려요.
-인도 날짜 잡히고 알아보면 늦어요.
+차값은 카드로도, 캐피탈 할부로도, 현금으로도 낼 수 있다. 다만 조건이 제각각이고 한도나 심사에 시간이 걸린다. 인도 날짜가 잡힌 뒤에 알아보면 늦다.
 
-보험이랑 번호판은 차 받기 전에 끝나 있어야 해요.
-차대번호는 내 차가 정해지면 앱에 떠요.
-보험사마다 필요한 게 다르니 미리 물어보시고,
-언제까지 끝내야 하는지도 같이 확인하세요.
+보험과 번호판은 차를 받기 전에 끝나 있어야 한다. 차대번호는 내 차가 정해지면 앱에 뜬다. 보험사마다 필요한 서류가 다르니 미리 물어보고, 언제까지 끝내야 하는지도 같이 확인해두는 게 좋다.
 
-차는 수도권 한 곳으로 모여요. 지방이면 배송을 신청하고요.
-장소랑 배송비는 배정 뒤에 알려줍니다.
+차는 수도권 한 곳으로 모인다. 지방이라면 배송을 신청하면 되고, 장소와 배송비는 배정된 뒤에 알려준다.
 
-그리고 제일 많이 놓치는 게 집 충전이에요.
-아파트면 주차장에 충전기가 있는지,
-입주민 등록이나 회원카드가 필요한지 먼저 보세요.
-차 받고 알아보면 그날부터 고생해요.
+제일 많이 놓치는 건 집 충전이다. 아파트라면 주차장 충전기가 몇 대인지, 입주민 등록이나 회원카드가 필요한지를 차 받기 전에 확인해둬야 한다. 받고 나서 알아보면 그날부터 고생한다.
 
 —
 테슬라 인수 가이드 (1/2)
-다음 편: 차 받았어요. 이제 뭐해요?</p>
-      <p class="tags">#테슬라 #모델Y #테슬라모델Y #모델Y주니퍼 #전기차 #신차인수 #테슬라출고 #전기차보조금 #테슬라오너 #차생활</p>
-    </details>
+다음 편: 차를 받은 날부터 첫 주가 중요하다</p><p class="tags">#테슬라 #모델Y #테슬라모델Y #모델Y주니퍼 #전기차 #신차인수 #테슬라출고 #전기차보조금 #테슬라오너 #차생활</p></details>
   </section>
 
   <section class="ep">
     <div class="ep-no">02</div>
-    <h2>차 받았어요. 이제 뭐해요?</h2>
+    <h2>차를 받은 날부터 첫 주가 중요하다</h2>
     <p class="meta">인수 당일부터 첫 주까지 · 카드 7장</p>
     <div class="cards">
-      <img src="cards/2/01.png" width="1080" height="1350" alt="차 받았어요. 이제 뭐해요? — 표지" loading="lazy">
-      <img src="cards/2/02.png" width="1080" height="1350" alt="2편 카드 2" loading="lazy">
-      <img src="cards/2/03.png" width="1080" height="1350" alt="2편 카드 3" loading="lazy">
-      <img src="cards/2/04.png" width="1080" height="1350" alt="2편 카드 4" loading="lazy">
-      <img src="cards/2/05.png" width="1080" height="1350" alt="2편 카드 5" loading="lazy">
-      <img src="cards/2/06.png" width="1080" height="1350" alt="2편 카드 6" loading="lazy">
-      <img src="cards/2/07.png" width="1080" height="1350" alt="2편 카드 7" loading="lazy">
+      <img src="cards/2/01.png" width="1080" height="1350" alt="2편 1번째 카드" loading="lazy">
+      <img src="cards/2/02.png" width="1080" height="1350" alt="2편 2번째 카드" loading="lazy">
+      <img src="cards/2/03.png" width="1080" height="1350" alt="2편 3번째 카드" loading="lazy">
+      <img src="cards/2/04.png" width="1080" height="1350" alt="2편 4번째 카드" loading="lazy">
+      <img src="cards/2/05.png" width="1080" height="1350" alt="2편 5번째 카드" loading="lazy">
+      <img src="cards/2/06.png" width="1080" height="1350" alt="2편 6번째 카드" loading="lazy">
+      <img src="cards/2/07.png" width="1080" height="1350" alt="2편 7번째 카드" loading="lazy">
     </div>
-    <p class="hint">← 옆으로 밀어서 보세요</p>
-    <details>
-      <summary>캡션 보기</summary>
-      <p class="caption">차 받는 날은 정신이 없어요.
-그날부터 첫 주까지 챙길 것만 모았어요.
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="caption">차를 받는 날은 정신이 없다. 그날부터 첫 주까지 챙길 것만 모았다.
 
-먼저, 비닐 뜯기 전에 한 바퀴 도세요.
-외관이랑 도장, 휠, 유리를 보고
-키 카드랑 충전 케이블이 다 들어 있는지 확인하세요.
-차대번호가 등록증이랑 같은지도요.
+먼저 비닐을 뜯기 전에 한 바퀴 돈다. 외관과 도장, 휠과 유리를 보고 키 카드와 충전 케이블이 다 들어 있는지 확인한다. 차대번호가 등록증과 같은지도 같이 본다.
 
-하자가 있으면 기한 안에 말해야 해요. 생각보다 짧습니다.
-요즘은 시공소에서 같이 봐주니까,
-시공 예약을 당일이나 다음날로 잡아두면 여유가 생겨요.
+하자가 있으면 기한 안에 말해야 하는데, 이 기한이 생각보다 짧다. 요즘은 시공소에서 같이 봐주니까 시공 예약을 당일이나 다음날로 잡아두면 여유가 생긴다.
 
-하이패스는 다음날부터 등록하세요.
-등록증 나온 당일에는 안 되는 경우가 있어요.
-단말기는 앞유리 위쪽 카메라 자리를 피해서 붙이시고요.
+하이패스는 다음날부터 등록한다. 등록증이 나온 당일에는 안 되는 경우가 있다. 단말기는 앞유리 위쪽 카메라 자리를 피해서 붙인다.
 
-충전 카드는 따로 신청해야 해요.
-무공해차 통합누리집에서 신청하고,
-하이패스 전기차 감면은 도로공사에 또 등록합니다.
+충전 카드는 따로 신청해야 한다. 무공해차 통합누리집에서 신청하고, 하이패스 전기차 감면은 도로공사에 또 등록한다.
 
 —
-테슬라 인수 가이드 (2/2)</p>
-      <p class="tags">#테슬라 #모델Y #테슬라모델Y #신차출고 #테슬라인도 #하이패스 #전기차충전 #테슬라오너 #전기차 #차생활</p>
-    </details>
+테슬라 인수 가이드 (2/2)</p><p class="tags">#테슬라 #모델Y #테슬라모델Y #신차출고 #테슬라인도 #하이패스 #전기차충전 #테슬라오너 #전기차 #차생활</p></details>
   </section>
 
   <section class="ep">
@@ -193,155 +129,115 @@
     <h2>테슬라에 숨어 있는 기능들</h2>
     <p class="meta">눌러보면 나오는 것들 · 카드 9장</p>
     <div class="cards">
-      <img src="cards/3/01.png" width="1080" height="1350" alt="테슬라에 숨어 있는 기능들 — 표지" loading="lazy">
-      <img src="cards/3/02.png" width="1080" height="1350" alt="3편 카드 2" loading="lazy">
-      <img src="cards/3/03.png" width="1080" height="1350" alt="3편 카드 3" loading="lazy">
-      <img src="cards/3/04.png" width="1080" height="1350" alt="3편 카드 4" loading="lazy">
-      <img src="cards/3/05.png" width="1080" height="1350" alt="3편 카드 5" loading="lazy">
-      <img src="cards/3/06.png" width="1080" height="1350" alt="3편 카드 6" loading="lazy">
-      <img src="cards/3/07.png" width="1080" height="1350" alt="3편 카드 7" loading="lazy">
-      <img src="cards/3/08.png" width="1080" height="1350" alt="3편 카드 8" loading="lazy">
-      <img src="cards/3/09.png" width="1080" height="1350" alt="3편 카드 9" loading="lazy">
+      <img src="cards/3/01.png" width="1080" height="1350" alt="3편 1번째 카드" loading="lazy">
+      <img src="cards/3/02.png" width="1080" height="1350" alt="3편 2번째 카드" loading="lazy">
+      <img src="cards/3/03.png" width="1080" height="1350" alt="3편 3번째 카드" loading="lazy">
+      <img src="cards/3/04.png" width="1080" height="1350" alt="3편 4번째 카드" loading="lazy">
+      <img src="cards/3/05.png" width="1080" height="1350" alt="3편 5번째 카드" loading="lazy">
+      <img src="cards/3/06.png" width="1080" height="1350" alt="3편 6번째 카드" loading="lazy">
+      <img src="cards/3/07.png" width="1080" height="1350" alt="3편 7번째 카드" loading="lazy">
+      <img src="cards/3/08.png" width="1080" height="1350" alt="3편 8번째 카드" loading="lazy">
+      <img src="cards/3/09.png" width="1080" height="1350" alt="3편 9번째 카드" loading="lazy">
     </div>
-    <p class="hint">← 옆으로 밀어서 보세요</p>
-    <details>
-      <summary>캡션 보기</summary>
-      <p class="todo">아직 안 썼습니다. 카드만 나온 상태예요.</p>
-    </details>
-  </section>
-
-
-  <section class="ep">
-    <h2 style="margin-bottom:6px">확인된 것들</h2>
-    <p class="meta">공식 매뉴얼·정부 발표로 교차 확인한 것만 적는다.
-    출처가 한 곳뿐이거나 상충하는 건 뺐다.</p>
-
-    <div class="fact now">
-      <span class="until">10월 31일까지</span>
-      <h3>주말 낮에 충전하면 더 싸다</h3>
-      <p>9월 5일부터 10월 31일까지, <strong>주말과 공휴일 오전 11시~오후 2시</strong>에
-      충전 요금이 내려간다. 가을 주말 낮에는 태양광 발전이 몰리는데 공장이 쉬고 냉난방도
-      줄어 전력이 남기 때문이다. 그 시간대로 수요를 옮기려는 한시 조치다.</p>
-      <table>
-        <tr><th>대상</th><th>할인</th></tr>
-        <tr><td>집·회사에 설치한 자가소비용</td><td class="n">전력량요금 50%<br>kWh당 40~49원</td></tr>
-        <tr><td>기후부 공공 급속 (약 9,600기)</td><td class="n">전체 요금 최대 32%<br>kWh당 85~97원</td></tr>
-        <tr><td>한전 공공 충전기</td><td class="n">기존 대비 11~17%</td></tr>
-      </table>
-      <p>민간 사업자도 요금 할인이나 포인트 적립으로 참여한다.
-      다만 <strong>자동으로 붙는지 따로 눌러야 하는지는 발표에 안 나온다.</strong>
-      쓰기 전에 앱에서 한 번 확인하는 게 안전하다.</p>
-      <p class="src">출처 ·
-      <a href="https://www.newspim.com/news/view/20260903000599">뉴스핌</a> ·
-      <a href="https://www.mt.co.kr/economy/2026/09/03/2026090310473726689">머니투데이</a></p>
-    </div>
-
-    <div class="fact">
-      <h3>공공충전 요금이 출력 5단계로 쪼개졌다</h3>
-      <p>2026년 8월 1일부터다. 전에는 100kW를 기준으로 두 단계였는데,
-      이제 충전기가 셀수록 비싸지는 구조가 요금표에 그대로 적혀 있다.</p>
-      <table>
-        <tr><th>충전기 출력</th><th>kWh당</th></tr>
-        <tr><td>30kW 미만 (완속)</td><td class="n">295.0원</td></tr>
-        <tr><td>30 ~ 50kW</td><td class="n">307.2원</td></tr>
-        <tr><td>50 ~ 100kW</td><td class="n">325.6원</td></tr>
-        <tr><td>100 ~ 200kW</td><td class="n">348.4원</td></tr>
-        <tr><td>200kW 이상 (초급속)</td><td class="n">393.1원</td></tr>
-      </table>
-      <p>공공충전기의 <strong>89.3%가 30kW 미만 완속</strong>이고, 이쪽은 324.4원에서
-      295원으로 9.1% 내렸다. 반대로 초급속은 347.2원에서 393.1원으로 13.2% 올랐다.
-      급하지 않으면 초급속에 갈 이유가 없어진 셈이다.</p>
-      <p>정부와 협약한 민간 충전기에서도 기후부 회원카드로 결제하면 이 요금이 적용된다.
-      참고로 <strong>부처 이름이 환경부에서 기후에너지환경부로 바뀌었다.</strong></p>
-      <p class="src">출처 ·
-      <a href="https://www.fnnews.com/news/202607010926433559">파이낸셜뉴스</a> ·
-      <a href="https://www.etoday.co.kr/news/view/2599046">이투데이</a></p>
-    </div>
-
-    <div class="fact">
-      <h3>집에서 충전할 수 있는지는 사는 곳에 따라 다르다</h3>
-      <p>전기차 이야기는 대개 아파트를 전제로 한다. 그런데
-      <strong>아파트에 사는 가구는 54.5%</strong>고, 나머지 절반은 조건이 전혀 다르다.</p>
-      <table>
-        <tr><th>사는 곳</th><th>충전 조건</th></tr>
-        <tr><td>아파트 100세대 이상</td><td>설치 의무. 신축은 주차면 5%, 기축은 2%</td></tr>
-        <tr><td>100세대 미만 공동주택</td><td>의무 대상이 아니다</td></tr>
-        <tr><td>단독주택 자가</td><td>가장 유리하다. 직접 설치하고 자가소비용 할인도 받는다</td></tr>
-        <tr><td>전월세</td><td>설치 권한이 집주인에게 있다</td></tr>
-      </table>
-      <p>아파트는 이제 "충전기가 있느냐"가 질문이 아니다. 기축 아파트 설치 기한이
-      2025년 1월이었고 전력설비가 부족한 경우의 유예도 2026년 1월에 끝났다.
-      물어야 할 건 <strong>몇 대인지</strong>다. 의무 비율이 2%라면 200세대 단지에
-      네 면 정도다.</p>
-      <p>그래서 문제가 옮겨갔다. 없는 게 아니라 있는데 못 쓴다.
-      낡은 단지는 연 3,000만원 이행강제금을 내고 설치를 미루기도 하고,
-      충전 관련 민원은 3년 새 1.8배 늘어 누적 17만 건을 넘었다.</p>
-      <p class="src">출처 ·
-      <a href="https://www.korea.kr/news/policyNewsView.do?newsId=148898174">정책브리핑</a> ·
-      <a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284799">2025 인구주택총조사</a> ·
-      <a href="https://www.hapt.co.kr/news/articleView.html?idxno=169370">한국아파트신문</a></p>
-    </div>
-
-    <div class="fact">
-      <h3>"80%까지만 충전하라"는 차에 따라 반대가 된다</h3>
-      <p>공식 매뉴얼은 숫자를 박아두지 않았다. 권장 한도는 차 화면에 표시된 값을 보라고만
-      되어 있고, 그 값이 배터리 종류에 따라 갈린다.</p>
-      <table>
-        <tr><th>배터리</th><th>일상 한도</th><th>100% 충전</th></tr>
-        <tr><td>LFP</td><td>100%로 두고 써도 된다</td><td>주 1회 이상 권장</td></tr>
-        <tr><td>삼원계 (NCM/NCA)</td><td>80~90%</td><td>장거리 출발 직전에만</td></tr>
-      </table>
-      <p>LFP가 100%를 권하는 이유는 수명이 아니라 <strong>계기 보정</strong>이다.
-      LFP는 방전 구간 전압이 평탄해서 잔량을 전압으로 추정하기 어렵고,
-      100%를 기준점 삼아 역산한다. LFP 차주에게 "80%만 채우세요"는
-      오히려 계기를 틀어지게 만드는 조언이다.</p>
-      <p>내 차 배터리는 <strong>컨트롤 &gt; 소프트웨어 &gt; 추가 차량 정보</strong>에서 확인한다.</p>
-      <p class="src">출처 ·
-      <a href="https://www.tesla.com/ownersmanual/modely/ko_kr/GUID-BEE08D47-0CE0-4BDD-83F2-9854FB3D578F.html">Tesla 오너스 매뉴얼 — 충전 지침</a></p>
-    </div>
-
-    <div class="fact">
-      <h3>여름에 뭘 켜둘지는 누가 차에 남느냐로 갈린다</h3>
-      <p>비슷해 보이는 세 기능이 사실 목적이 다르다. 섞어 쓰면 안 된다.</p>
-      <table>
-        <tr><th>기능</th><th>언제</th><th>하는 일</th></tr>
-        <tr><td>실내 과열 방지</td><td>아무도 없을 때</td><td>실내가 40°C를 넘으면 식힌다. 최대 12시간</td></tr>
-        <tr><td>도그 모드</td><td>반려동물만 두고 내릴 때</td><td>설정 온도를 유지하고 화면에 안내를 띄운다</td></tr>
-        <tr><td>캠프 모드</td><td>내가 안에 있을 때</td><td>공조·음악·전원을 유지한다. 문은 잠기지 않는다</td></tr>
-      </table>
-      <p>셋 다 <strong>배터리가 20%에 닿으면 자동으로 꺼진다.</strong>
-      배터리가 걱정된다면 답은 간단하다. 안 쓸 때 플러그를 꽂아두면
-      배터리가 아니라 충전 시스템이 전력을 쓴다. 매뉴얼에도 그렇게 적혀 있다.</p>
-      <p class="src">출처 ·
-      <a href="https://www.tesla.com/ownersmanual/modely/ko_us/GUID-6F5B7B3F-F020-471D-9D46-D1F990A6237A.html">Tesla 오너스 매뉴얼 — 뜨거운 날씨 모범 사례</a></p>
-    </div>
-
-    <div class="fact">
-      <h3>오토파일럿이 처음에 안 켜지는 건 고장이 아니다</h3>
-      <p>카메라 보정이 끝나야 켜진다. 공식 문서는 보통
-      <strong>32~40km를 주행하면 완료</strong>된다고 안내하는데,
-      도로 조건이 나쁘면 160km까지 가기도 한다.</p>
-      <p>빨리 끝내려면 차선이 잘 보이는 직선 다차선 도로를 달리면 된다.
-      고속도로, 그중에서도 가운데 차선이 좋고 교통량이 적을수록 낫다.
-      며칠째 안 된다면 주말에 고속도로를 한 번 타는 게 가장 빠르다.
-      반대로 도심 출퇴근만 하면 오래 걸릴 수 있다.</p>
-      <p>진행률은 계기판에 표시된다.</p>
-      <p class="src">출처 ·
-      <a href="https://service.tesla.com/docs/Public/diy/models/ko_kr/GUID-D6F7D1BC-193D-4A2E-99B0-E3BA3D41BDE2.html">Tesla 서비스 문서 — 카메라 보정</a></p>
-    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
   </section>
 
   <section class="ep">
-    <h2 style="margin-bottom:6px">준비 중</h2>
-    <p class="meta">근거를 다 확인한 주제만 적는다. 리서치가 남은 건 올리지 않는다.</p>
-    <div class="soon">
-      <div><b>돈</b><span>1년 타면 유지비가 얼마나 나오나 — 보험이 충전비보다 크다</span></div>
-      <div><b>돈</b><span>완속과 급속, 1년이면 차이가 벌어진다</span></div>
-      <div><b>돈</b><span>"엔진오일이 없으니 유지비가 없다"는 말 — 타이어가 최대 지출이다</span></div>
-      <div><b>충전</b><span>아파트 충전기, 무엇을 확인해야 하나</span></div>
-      <div><b>충전</b><span>충전요금은 왜 갈 때마다 다른가</span></div>
-      <div><b>계절</b><span>겨울에 주행거리가 얼마나 줄어드나</span></div>
+    <div class="ep-no">04</div>
+    <span class="until">10월 31일까지</span>
+    <h2>주말 낮에 충전하면 요금이 내려간다</h2>
+    <p class="meta">10월 31일까지만 · 카드 6장</p>
+    <div class="cards">
+      <img src="cards/4/01.png" width="1080" height="1350" alt="4편 1번째 카드" loading="lazy">
+      <img src="cards/4/02.png" width="1080" height="1350" alt="4편 2번째 카드" loading="lazy">
+      <img src="cards/4/03.png" width="1080" height="1350" alt="4편 3번째 카드" loading="lazy">
+      <img src="cards/4/04.png" width="1080" height="1350" alt="4편 4번째 카드" loading="lazy">
+      <img src="cards/4/05.png" width="1080" height="1350" alt="4편 5번째 카드" loading="lazy">
+      <img src="cards/4/06.png" width="1080" height="1350" alt="4편 6번째 카드" loading="lazy">
     </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">05</div>
+    <h2>충전요금이 갈 때마다 다른 이유</h2>
+    <p class="meta">2026년 8월, 체계가 바뀌었다 · 카드 6장</p>
+    <div class="cards">
+      <img src="cards/5/01.png" width="1080" height="1350" alt="5편 1번째 카드" loading="lazy">
+      <img src="cards/5/02.png" width="1080" height="1350" alt="5편 2번째 카드" loading="lazy">
+      <img src="cards/5/03.png" width="1080" height="1350" alt="5편 3번째 카드" loading="lazy">
+      <img src="cards/5/04.png" width="1080" height="1350" alt="5편 4번째 카드" loading="lazy">
+      <img src="cards/5/05.png" width="1080" height="1350" alt="5편 5번째 카드" loading="lazy">
+      <img src="cards/5/06.png" width="1080" height="1350" alt="5편 6번째 카드" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">06</div>
+    <h2>우리 집에서 충전할 수 있나</h2>
+    <p class="meta">계약하기 전에 볼 것 · 카드 7장</p>
+    <div class="cards">
+      <img src="cards/6/01.png" width="1080" height="1350" alt="6편 1번째 카드" loading="lazy">
+      <img src="cards/6/02.png" width="1080" height="1350" alt="6편 2번째 카드" loading="lazy">
+      <img src="cards/6/03.png" width="1080" height="1350" alt="6편 3번째 카드" loading="lazy">
+      <img src="cards/6/04.png" width="1080" height="1350" alt="6편 4번째 카드" loading="lazy">
+      <img src="cards/6/05.png" width="1080" height="1350" alt="6편 5번째 카드" loading="lazy">
+      <img src="cards/6/06.png" width="1080" height="1350" alt="6편 6번째 카드" loading="lazy">
+      <img src="cards/6/07.png" width="1080" height="1350" alt="6편 7번째 카드" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">07</div>
+    <h2>&quot;80%까지만&quot;은 차에 따라 반대가 된다</h2>
+    <p class="meta">내 차 배터리부터 본다 · 카드 6장</p>
+    <div class="cards">
+      <img src="cards/7/01.png" width="1080" height="1350" alt="7편 1번째 카드" loading="lazy">
+      <img src="cards/7/02.png" width="1080" height="1350" alt="7편 2번째 카드" loading="lazy">
+      <img src="cards/7/03.png" width="1080" height="1350" alt="7편 3번째 카드" loading="lazy">
+      <img src="cards/7/04.png" width="1080" height="1350" alt="7편 4번째 카드" loading="lazy">
+      <img src="cards/7/05.png" width="1080" height="1350" alt="7편 5번째 카드" loading="lazy">
+      <img src="cards/7/06.png" width="1080" height="1350" alt="7편 6번째 카드" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">08</div>
+    <h2>여름에 뭘 켜둘지는 누가 남느냐로 갈린다</h2>
+    <p class="meta">비슷해 보이는 세 기능 · 카드 6장</p>
+    <div class="cards">
+      <img src="cards/8/01.png" width="1080" height="1350" alt="8편 1번째 카드" loading="lazy">
+      <img src="cards/8/02.png" width="1080" height="1350" alt="8편 2번째 카드" loading="lazy">
+      <img src="cards/8/03.png" width="1080" height="1350" alt="8편 3번째 카드" loading="lazy">
+      <img src="cards/8/04.png" width="1080" height="1350" alt="8편 4번째 카드" loading="lazy">
+      <img src="cards/8/05.png" width="1080" height="1350" alt="8편 5번째 카드" loading="lazy">
+      <img src="cards/8/06.png" width="1080" height="1350" alt="8편 6번째 카드" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">09</div>
+    <h2>오토파일럿이 처음에 안 켜지는 건 고장이 아니다</h2>
+    <p class="meta">카메라 보정이 끝나야 켜진다 · 카드 5장</p>
+    <div class="cards">
+      <img src="cards/9/01.png" width="1080" height="1350" alt="9편 1번째 카드" loading="lazy">
+      <img src="cards/9/02.png" width="1080" height="1350" alt="9편 2번째 카드" loading="lazy">
+      <img src="cards/9/03.png" width="1080" height="1350" alt="9편 3번째 카드" loading="lazy">
+      <img src="cards/9/04.png" width="1080" height="1350" alt="9편 4번째 카드" loading="lazy">
+      <img src="cards/9/05.png" width="1080" height="1350" alt="9편 5번째 카드" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀면 다음 카드</p>
+    <details><summary>캡션 보기</summary><p class="todo">캡션은 아직 안 썼다. 카드만 나온 상태다.</p></details>
   </section>
 
   <footer>
