@@ -60,6 +60,29 @@
   .tags{margin:16px 0 0;font-size:12.5px;color:var(--faint);line-height:1.8}
   .todo{color:var(--faint);font-size:13px;margin:0}
 
+  .fact{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+        padding:18px 20px;margin:0 0 12px}
+  .fact h3{font-size:15px;font-weight:700;letter-spacing:-.02em;margin:0 0 10px}
+  .fact p{margin:0 0 10px;font-size:13.5px;line-height:1.75;color:var(--dim)}
+  .fact p:last-child{margin-bottom:0}
+  .fact strong{color:var(--fg);font-weight:600}
+  .fact table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12.5px}
+  .fact th,.fact td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);
+                    vertical-align:top}
+  .fact th{color:var(--faint);font-weight:600;font-size:11.5px;letter-spacing:.04em}
+  .fact td.n{text-align:right;white-space:nowrap;color:var(--fg)}
+  .src{font-size:11.5px;color:var(--faint);margin:12px 0 0;line-height:1.7}
+  .src a{color:var(--faint);text-decoration:underline;text-underline-offset:2px}
+  .src a:hover{color:var(--acc)}
+  .now{border-color:var(--acc)}
+  .now h3::before{content:"지금 ";color:var(--acc)}
+  .until{display:inline-block;font-size:11px;letter-spacing:.06em;color:var(--acc);
+         border:1px solid var(--acc);border-radius:99px;padding:2px 9px;margin:0 0 10px}
+  .soon{display:grid;gap:8px;margin:0}
+  .soon div{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:baseline;
+            font-size:13.5px;color:var(--dim);padding:10px 0;border-bottom:1px solid var(--line)}
+  .soon div:last-child{border-bottom:0}
+  .soon b{color:var(--faint);font-weight:600;font-size:11.5px;letter-spacing:.06em}
   footer{padding:36px 0 64px;color:var(--faint);font-size:12.5px}
   footer p{margin:0 0 6px}
 </style>
@@ -71,8 +94,8 @@
     <a class="back" href="/">← beta4eva</a>
     <h1>taut</h1>
     <p class="tag">테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것부터.</p>
-    <p class="note">금액·기한은 해마다, 지자체마다 바뀝니다.
-    카드에 숫자를 적지 않은 건 그래서입니다. 내 지역 공고를 꼭 같이 보세요.</p>
+    <p class="note">제도와 요금은 해마다, 지역마다 바뀐다. 출처를 밝힌 것만 적고,
+    확인이 덜 된 건 올리지 않는다. 그래도 내 지역 공고는 직접 봐야 한다.</p>
   </header>
 
   <section class="ep">
@@ -185,6 +208,140 @@
       <summary>캡션 보기</summary>
       <p class="todo">아직 안 썼습니다. 카드만 나온 상태예요.</p>
     </details>
+  </section>
+
+
+  <section class="ep">
+    <h2 style="margin-bottom:6px">확인된 것들</h2>
+    <p class="meta">공식 매뉴얼·정부 발표로 교차 확인한 것만 적는다.
+    출처가 한 곳뿐이거나 상충하는 건 뺐다.</p>
+
+    <div class="fact now">
+      <span class="until">10월 31일까지</span>
+      <h3>주말 낮에 충전하면 더 싸다</h3>
+      <p>9월 5일부터 10월 31일까지, <strong>주말과 공휴일 오전 11시~오후 2시</strong>에
+      충전 요금이 내려간다. 가을 주말 낮에는 태양광 발전이 몰리는데 공장이 쉬고 냉난방도
+      줄어 전력이 남기 때문이다. 그 시간대로 수요를 옮기려는 한시 조치다.</p>
+      <table>
+        <tr><th>대상</th><th>할인</th></tr>
+        <tr><td>집·회사에 설치한 자가소비용</td><td class="n">전력량요금 50%<br>kWh당 40~49원</td></tr>
+        <tr><td>기후부 공공 급속 (약 9,600기)</td><td class="n">전체 요금 최대 32%<br>kWh당 85~97원</td></tr>
+        <tr><td>한전 공공 충전기</td><td class="n">기존 대비 11~17%</td></tr>
+      </table>
+      <p>민간 사업자도 요금 할인이나 포인트 적립으로 참여한다.
+      다만 <strong>자동으로 붙는지 따로 눌러야 하는지는 발표에 안 나온다.</strong>
+      쓰기 전에 앱에서 한 번 확인하는 게 안전하다.</p>
+      <p class="src">출처 ·
+      <a href="https://www.newspim.com/news/view/20260903000599">뉴스핌</a> ·
+      <a href="https://www.mt.co.kr/economy/2026/09/03/2026090310473726689">머니투데이</a></p>
+    </div>
+
+    <div class="fact">
+      <h3>공공충전 요금이 출력 5단계로 쪼개졌다</h3>
+      <p>2026년 8월 1일부터다. 전에는 100kW를 기준으로 두 단계였는데,
+      이제 충전기가 셀수록 비싸지는 구조가 요금표에 그대로 적혀 있다.</p>
+      <table>
+        <tr><th>충전기 출력</th><th>kWh당</th></tr>
+        <tr><td>30kW 미만 (완속)</td><td class="n">295.0원</td></tr>
+        <tr><td>30 ~ 50kW</td><td class="n">307.2원</td></tr>
+        <tr><td>50 ~ 100kW</td><td class="n">325.6원</td></tr>
+        <tr><td>100 ~ 200kW</td><td class="n">348.4원</td></tr>
+        <tr><td>200kW 이상 (초급속)</td><td class="n">393.1원</td></tr>
+      </table>
+      <p>공공충전기의 <strong>89.3%가 30kW 미만 완속</strong>이고, 이쪽은 324.4원에서
+      295원으로 9.1% 내렸다. 반대로 초급속은 347.2원에서 393.1원으로 13.2% 올랐다.
+      급하지 않으면 초급속에 갈 이유가 없어진 셈이다.</p>
+      <p>정부와 협약한 민간 충전기에서도 기후부 회원카드로 결제하면 이 요금이 적용된다.
+      참고로 <strong>부처 이름이 환경부에서 기후에너지환경부로 바뀌었다.</strong></p>
+      <p class="src">출처 ·
+      <a href="https://www.fnnews.com/news/202607010926433559">파이낸셜뉴스</a> ·
+      <a href="https://www.etoday.co.kr/news/view/2599046">이투데이</a></p>
+    </div>
+
+    <div class="fact">
+      <h3>집에서 충전할 수 있는지는 사는 곳에 따라 다르다</h3>
+      <p>전기차 이야기는 대개 아파트를 전제로 한다. 그런데
+      <strong>아파트에 사는 가구는 54.5%</strong>고, 나머지 절반은 조건이 전혀 다르다.</p>
+      <table>
+        <tr><th>사는 곳</th><th>충전 조건</th></tr>
+        <tr><td>아파트 100세대 이상</td><td>설치 의무. 신축은 주차면 5%, 기축은 2%</td></tr>
+        <tr><td>100세대 미만 공동주택</td><td>의무 대상이 아니다</td></tr>
+        <tr><td>단독주택 자가</td><td>가장 유리하다. 직접 설치하고 자가소비용 할인도 받는다</td></tr>
+        <tr><td>전월세</td><td>설치 권한이 집주인에게 있다</td></tr>
+      </table>
+      <p>아파트는 이제 "충전기가 있느냐"가 질문이 아니다. 기축 아파트 설치 기한이
+      2025년 1월이었고 전력설비가 부족한 경우의 유예도 2026년 1월에 끝났다.
+      물어야 할 건 <strong>몇 대인지</strong>다. 의무 비율이 2%라면 200세대 단지에
+      네 면 정도다.</p>
+      <p>그래서 문제가 옮겨갔다. 없는 게 아니라 있는데 못 쓴다.
+      낡은 단지는 연 3,000만원 이행강제금을 내고 설치를 미루기도 하고,
+      충전 관련 민원은 3년 새 1.8배 늘어 누적 17만 건을 넘었다.</p>
+      <p class="src">출처 ·
+      <a href="https://www.korea.kr/news/policyNewsView.do?newsId=148898174">정책브리핑</a> ·
+      <a href="https://eiec.kdi.re.kr/policy/materialView.do?num=284799">2025 인구주택총조사</a> ·
+      <a href="https://www.hapt.co.kr/news/articleView.html?idxno=169370">한국아파트신문</a></p>
+    </div>
+
+    <div class="fact">
+      <h3>"80%까지만 충전하라"는 차에 따라 반대가 된다</h3>
+      <p>공식 매뉴얼은 숫자를 박아두지 않았다. 권장 한도는 차 화면에 표시된 값을 보라고만
+      되어 있고, 그 값이 배터리 종류에 따라 갈린다.</p>
+      <table>
+        <tr><th>배터리</th><th>일상 한도</th><th>100% 충전</th></tr>
+        <tr><td>LFP</td><td>100%로 두고 써도 된다</td><td>주 1회 이상 권장</td></tr>
+        <tr><td>삼원계 (NCM/NCA)</td><td>80~90%</td><td>장거리 출발 직전에만</td></tr>
+      </table>
+      <p>LFP가 100%를 권하는 이유는 수명이 아니라 <strong>계기 보정</strong>이다.
+      LFP는 방전 구간 전압이 평탄해서 잔량을 전압으로 추정하기 어렵고,
+      100%를 기준점 삼아 역산한다. LFP 차주에게 "80%만 채우세요"는
+      오히려 계기를 틀어지게 만드는 조언이다.</p>
+      <p>내 차 배터리는 <strong>컨트롤 &gt; 소프트웨어 &gt; 추가 차량 정보</strong>에서 확인한다.</p>
+      <p class="src">출처 ·
+      <a href="https://www.tesla.com/ownersmanual/modely/ko_kr/GUID-BEE08D47-0CE0-4BDD-83F2-9854FB3D578F.html">Tesla 오너스 매뉴얼 — 충전 지침</a></p>
+    </div>
+
+    <div class="fact">
+      <h3>여름에 뭘 켜둘지는 누가 차에 남느냐로 갈린다</h3>
+      <p>비슷해 보이는 세 기능이 사실 목적이 다르다. 섞어 쓰면 안 된다.</p>
+      <table>
+        <tr><th>기능</th><th>언제</th><th>하는 일</th></tr>
+        <tr><td>실내 과열 방지</td><td>아무도 없을 때</td><td>실내가 40°C를 넘으면 식힌다. 최대 12시간</td></tr>
+        <tr><td>도그 모드</td><td>반려동물만 두고 내릴 때</td><td>설정 온도를 유지하고 화면에 안내를 띄운다</td></tr>
+        <tr><td>캠프 모드</td><td>내가 안에 있을 때</td><td>공조·음악·전원을 유지한다. 문은 잠기지 않는다</td></tr>
+      </table>
+      <p>셋 다 <strong>배터리가 20%에 닿으면 자동으로 꺼진다.</strong>
+      배터리가 걱정된다면 답은 간단하다. 안 쓸 때 플러그를 꽂아두면
+      배터리가 아니라 충전 시스템이 전력을 쓴다. 매뉴얼에도 그렇게 적혀 있다.</p>
+      <p class="src">출처 ·
+      <a href="https://www.tesla.com/ownersmanual/modely/ko_us/GUID-6F5B7B3F-F020-471D-9D46-D1F990A6237A.html">Tesla 오너스 매뉴얼 — 뜨거운 날씨 모범 사례</a></p>
+    </div>
+
+    <div class="fact">
+      <h3>오토파일럿이 처음에 안 켜지는 건 고장이 아니다</h3>
+      <p>카메라 보정이 끝나야 켜진다. 공식 문서는 보통
+      <strong>32~40km를 주행하면 완료</strong>된다고 안내하는데,
+      도로 조건이 나쁘면 160km까지 가기도 한다.</p>
+      <p>빨리 끝내려면 차선이 잘 보이는 직선 다차선 도로를 달리면 된다.
+      고속도로, 그중에서도 가운데 차선이 좋고 교통량이 적을수록 낫다.
+      며칠째 안 된다면 주말에 고속도로를 한 번 타는 게 가장 빠르다.
+      반대로 도심 출퇴근만 하면 오래 걸릴 수 있다.</p>
+      <p>진행률은 계기판에 표시된다.</p>
+      <p class="src">출처 ·
+      <a href="https://service.tesla.com/docs/Public/diy/models/ko_kr/GUID-D6F7D1BC-193D-4A2E-99B0-E3BA3D41BDE2.html">Tesla 서비스 문서 — 카메라 보정</a></p>
+    </div>
+  </section>
+
+  <section class="ep">
+    <h2 style="margin-bottom:6px">준비 중</h2>
+    <p class="meta">근거를 다 확인한 주제만 적는다. 리서치가 남은 건 올리지 않는다.</p>
+    <div class="soon">
+      <div><b>돈</b><span>1년 타면 유지비가 얼마나 나오나 — 보험이 충전비보다 크다</span></div>
+      <div><b>돈</b><span>완속과 급속, 1년이면 차이가 벌어진다</span></div>
+      <div><b>돈</b><span>"엔진오일이 없으니 유지비가 없다"는 말 — 타이어가 최대 지출이다</span></div>
+      <div><b>충전</b><span>아파트 충전기, 무엇을 확인해야 하나</span></div>
+      <div><b>충전</b><span>충전요금은 왜 갈 때마다 다른가</span></div>
+      <div><b>계절</b><span>겨울에 주행거리가 얼마나 줄어드나</span></div>
+    </div>
   </section>
 
   <footer>
