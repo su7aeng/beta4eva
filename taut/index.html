@@ -1,13 +1,197 @@
 <!DOCTYPE html>
 <html lang="ko">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.92em' font-size='92'%3E%CE%B2%3C/text%3E%3C/svg%3E">
-<title>tesla-import — beta4eva</title>
-<body style="background:#0b0d10;color:#8b93a1;font-family:ui-monospace,monospace;display:grid;place-items:center;height:100vh;margin:0">
-<div style="text-align:center">
-<p style="color:#e6e9ef;font-size:20px;margin:0 0 8px">tesla-import</p>
-<p style="margin:0 0 20px">아직 안 올림. 여기에 아티팩트 HTML을 index.html로 덮어쓰면 됨.</p>
-<a href="/" style="color:#7cf2b0">← beta4eva</a>
+<title>taut — 테슬라 오너 카드뉴스</title>
+<meta name="description" content="테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것, 숨어 있는 기능들.">
+<meta property="og:title" content="taut — 테슬라 오너 카드뉴스">
+<meta property="og:description" content="인수 전후에 챙길 것, 숨어 있는 기능들.">
+<meta property="og:image" content="/taut/cards/1/01.png">
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#12151a; --line:#232830;
+    --fg:#e6e9ef; --dim:#8b93a1; --faint:#5b636f;
+    --acc:#7cf2b0;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--fg);font-family:var(--mono);
+    font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;
+    word-break:keep-all;overflow-wrap:break-word;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px}
+  a{color:var(--acc)}
+  header{padding:64px 0 32px;border-bottom:1px solid var(--line)}
+  .back{font-size:12.5px;color:var(--faint);text-decoration:none}
+  .back:hover{color:var(--acc)}
+  h1{font-size:clamp(32px,8vw,52px);font-weight:700;letter-spacing:-.04em;line-height:1;margin:18px 0 0}
+  .tag{margin:16px 0 0;color:var(--dim);max-width:40ch;text-wrap:balance}
+  .note{margin:20px 0 0;font-size:12.5px;color:var(--faint);
+        border-left:2px solid var(--line);padding-left:12px}
+
+  .ep{padding:40px 0;border-bottom:1px solid var(--line)}
+  .ep-no{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  h2{font-size:clamp(20px,5vw,26px);font-weight:700;letter-spacing:-.02em;
+     line-height:1.35;margin:8px 0 4px;text-wrap:balance}
+  .meta{font-size:12.5px;color:var(--faint);margin:0 0 20px}
+
+  /* 카드 스트립 — 인스타 캐러셀처럼 옆으로 밀어서 봄 */
+  .cards{
+    display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;
+    scroll-padding-left:20px;padding:0 20px 14px;margin:0 -20px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+  }
+  .cards img{
+    flex:0 0 min(80%,320px);width:min(80%,320px);height:auto;
+    scroll-snap-align:start;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel);
+  }
+  .hint{font-size:12px;color:var(--faint);margin:0 0 20px}
+
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+          padding:14px 18px}
+  summary{cursor:pointer;font-size:13px;color:var(--dim);letter-spacing:-.01em}
+  summary:hover{color:var(--fg)}
+  .caption{white-space:pre-wrap;font-size:13.5px;line-height:1.8;color:var(--fg);
+           margin:16px 0 0}
+  .tags{margin:16px 0 0;font-size:12.5px;color:var(--faint);line-height:1.8}
+  .todo{color:var(--faint);font-size:13px;margin:0}
+
+  footer{padding:36px 0 64px;color:var(--faint);font-size:12.5px}
+  footer p{margin:0 0 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <a class="back" href="/">← beta4eva</a>
+    <h1>taut</h1>
+    <p class="tag">테슬라 오너를 위한 카드뉴스. 인수 전후에 챙길 것부터.</p>
+    <p class="note">금액·기한은 해마다, 지자체마다 바뀝니다.
+    카드에 숫자를 적지 않은 건 그래서입니다. 내 지역 공고를 꼭 같이 보세요.</p>
+  </header>
+
+  <section class="ep">
+    <div class="ep-no">01</div>
+    <h2>테슬라 주문했는데 뭐부터 해요?</h2>
+    <p class="meta">차 받기 전 체크리스트 5 · 카드 8장</p>
+    <div class="cards">
+      <img src="cards/1/01.png" width="1080" height="1350" alt="테슬라 주문했는데 뭐부터 해요? — 표지" loading="lazy">
+      <img src="cards/1/02.png" width="1080" height="1350" alt="1편 카드 2" loading="lazy">
+      <img src="cards/1/03.png" width="1080" height="1350" alt="1편 카드 3" loading="lazy">
+      <img src="cards/1/04.png" width="1080" height="1350" alt="1편 카드 4" loading="lazy">
+      <img src="cards/1/05.png" width="1080" height="1350" alt="1편 카드 5" loading="lazy">
+      <img src="cards/1/06.png" width="1080" height="1350" alt="1편 카드 6" loading="lazy">
+      <img src="cards/1/07.png" width="1080" height="1350" alt="1편 카드 7" loading="lazy">
+      <img src="cards/1/08.png" width="1080" height="1350" alt="1편 카드 8" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀어서 보세요</p>
+    <details>
+      <summary>캡션 보기</summary>
+      <p class="caption">테슬라 주문하고 나면 그다음이 잘 안 보이죠.
+차 받기 전에 챙길 것만 다섯 개로 모았어요.
+
+보조금은 계약한 날이 아니라 차를 받는 날로 줄을 서요.
+그래서 인도가 밀리면 예산이 먼저 떨어질 수도 있어요.
+금액은 해마다, 지자체마다 다르니까 내 지역 공고를 꼭 보세요.
+
+차값은 카드로도, 캐피탈 할부로도, 현금으로도 낼 수 있어요.
+조건이 다 다르고 한도나 심사에 시간이 걸려요.
+인도 날짜 잡히고 알아보면 늦어요.
+
+보험이랑 번호판은 차 받기 전에 끝나 있어야 해요.
+차대번호는 내 차가 정해지면 앱에 떠요.
+보험사마다 필요한 게 다르니 미리 물어보시고,
+언제까지 끝내야 하는지도 같이 확인하세요.
+
+차는 수도권 한 곳으로 모여요. 지방이면 배송을 신청하고요.
+장소랑 배송비는 배정 뒤에 알려줍니다.
+
+그리고 제일 많이 놓치는 게 집 충전이에요.
+아파트면 주차장에 충전기가 있는지,
+입주민 등록이나 회원카드가 필요한지 먼저 보세요.
+차 받고 알아보면 그날부터 고생해요.
+
+—
+테슬라 인수 가이드 (1/2)
+다음 편: 차 받았어요. 이제 뭐해요?</p>
+      <p class="tags">#테슬라 #모델Y #테슬라모델Y #모델Y주니퍼 #전기차 #신차인수 #테슬라출고 #전기차보조금 #테슬라오너 #차생활</p>
+    </details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">02</div>
+    <h2>차 받았어요. 이제 뭐해요?</h2>
+    <p class="meta">인수 당일부터 첫 주까지 · 카드 7장</p>
+    <div class="cards">
+      <img src="cards/2/01.png" width="1080" height="1350" alt="차 받았어요. 이제 뭐해요? — 표지" loading="lazy">
+      <img src="cards/2/02.png" width="1080" height="1350" alt="2편 카드 2" loading="lazy">
+      <img src="cards/2/03.png" width="1080" height="1350" alt="2편 카드 3" loading="lazy">
+      <img src="cards/2/04.png" width="1080" height="1350" alt="2편 카드 4" loading="lazy">
+      <img src="cards/2/05.png" width="1080" height="1350" alt="2편 카드 5" loading="lazy">
+      <img src="cards/2/06.png" width="1080" height="1350" alt="2편 카드 6" loading="lazy">
+      <img src="cards/2/07.png" width="1080" height="1350" alt="2편 카드 7" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀어서 보세요</p>
+    <details>
+      <summary>캡션 보기</summary>
+      <p class="caption">차 받는 날은 정신이 없어요.
+그날부터 첫 주까지 챙길 것만 모았어요.
+
+먼저, 비닐 뜯기 전에 한 바퀴 도세요.
+외관이랑 도장, 휠, 유리를 보고
+키 카드랑 충전 케이블이 다 들어 있는지 확인하세요.
+차대번호가 등록증이랑 같은지도요.
+
+하자가 있으면 기한 안에 말해야 해요. 생각보다 짧습니다.
+요즘은 시공소에서 같이 봐주니까,
+시공 예약을 당일이나 다음날로 잡아두면 여유가 생겨요.
+
+하이패스는 다음날부터 등록하세요.
+등록증 나온 당일에는 안 되는 경우가 있어요.
+단말기는 앞유리 위쪽 카메라 자리를 피해서 붙이시고요.
+
+충전 카드는 따로 신청해야 해요.
+무공해차 통합누리집에서 신청하고,
+하이패스 전기차 감면은 도로공사에 또 등록합니다.
+
+—
+테슬라 인수 가이드 (2/2)</p>
+      <p class="tags">#테슬라 #모델Y #테슬라모델Y #신차출고 #테슬라인도 #하이패스 #전기차충전 #테슬라오너 #전기차 #차생활</p>
+    </details>
+  </section>
+
+  <section class="ep">
+    <div class="ep-no">03</div>
+    <h2>테슬라에 숨어 있는 기능들</h2>
+    <p class="meta">눌러보면 나오는 것들 · 카드 9장</p>
+    <div class="cards">
+      <img src="cards/3/01.png" width="1080" height="1350" alt="테슬라에 숨어 있는 기능들 — 표지" loading="lazy">
+      <img src="cards/3/02.png" width="1080" height="1350" alt="3편 카드 2" loading="lazy">
+      <img src="cards/3/03.png" width="1080" height="1350" alt="3편 카드 3" loading="lazy">
+      <img src="cards/3/04.png" width="1080" height="1350" alt="3편 카드 4" loading="lazy">
+      <img src="cards/3/05.png" width="1080" height="1350" alt="3편 카드 5" loading="lazy">
+      <img src="cards/3/06.png" width="1080" height="1350" alt="3편 카드 6" loading="lazy">
+      <img src="cards/3/07.png" width="1080" height="1350" alt="3편 카드 7" loading="lazy">
+      <img src="cards/3/08.png" width="1080" height="1350" alt="3편 카드 8" loading="lazy">
+      <img src="cards/3/09.png" width="1080" height="1350" alt="3편 카드 9" loading="lazy">
+    </div>
+    <p class="hint">← 옆으로 밀어서 보세요</p>
+    <details>
+      <summary>캡션 보기</summary>
+      <p class="todo">아직 안 썼습니다. 카드만 나온 상태예요.</p>
+    </details>
+  </section>
+
+  <footer>
+    <p>taut — 만드는 중.</p>
+    <p><a href="/">beta4eva</a></p>
+  </footer>
+
 </div>
 </body>
+</html>
