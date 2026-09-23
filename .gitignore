@@ -4,3 +4,4 @@
 !.env.example
 *.log
 .idea/
+.claude/settings.local.json
